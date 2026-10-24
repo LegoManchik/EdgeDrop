@@ -20,7 +20,7 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Restore dependencies
-      run: dotnet restore LocalSender.sln
+      run: dotnet restore EdgeDrop.sln
 
     - name: Build Solution
-      run: dotnet build LocalSender.sln --configuration Release --no-restore
+      run: dotnet build EdgeDrop.sln --configuration Release --no-restore

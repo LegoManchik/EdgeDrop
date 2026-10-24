@@ -10,6 +10,8 @@
     <AssemblyName>EdgeDrop</AssemblyName>
     <Product>EdgeDrop</Product>
     <Version>1.0.0</Version>
+    <Authors>LegoManchik</Authors>
+    <Company>LegoManchik</Company>
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 

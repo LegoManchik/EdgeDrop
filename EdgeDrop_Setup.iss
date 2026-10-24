@@ -1,6 +1,6 @@
 #define MyAppName "EdgeDrop"
 #define MyAppVersion "1.0.0"
-#define MyAppPublisher "EdgeDrop Team"
+#define MyAppPublisher "LegoManchik"
 #define MyAppExeName "EdgeDrop.exe"
 #define SourceDir "publish"
 
@@ -14,7 +14,7 @@ DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 OutputDir=installer_output
 OutputBaseFilename=EdgeDrop_Setup_v1.0.0
-SetupIconFile=LocalSender\icon.ico
+SetupIconFile=EdgeDrop\icon.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
@@ -33,7 +33,7 @@ Name: "shellcontext"; Description: "Add 'Send with EdgeDrop' to Windows Explorer
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "LocalSender\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "EdgeDrop\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\icon.ico"
