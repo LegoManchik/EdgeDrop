@@ -1,5 +1,4 @@
-﻿using System;
-
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -7,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 
 namespace EdgeDrop;
 
@@ -471,7 +471,13 @@ public partial class MainWindow : Window
 
             mainStack.Children.Add(cardBody);
 
-            cardBorder.Child = mainStack;
+            AttachCardDragDrop(cardBorder, mainStack, files =>
+            {
+                if (!_running) Start();
+                _transferService.SendFiles(device, files, isWebTarget: false);
+                ShowTransferFooter(true);
+                AppLogger.Info($"Card drag-and-drop: sending {files.Length} file(s) to device '{device.Name}' ({device.Ip})", "Transfer");
+            });
 
             Action toggleCollapse = () =>
             {
@@ -925,7 +931,13 @@ public partial class MainWindow : Window
 
         mainStack.Children.Add(cardBody);
 
-        cardBorder.Child = mainStack;
+        AttachCardDragDrop(cardBorder, mainStack, files =>
+        {
+            if (!_running) Start();
+            _transferService.SendFiles(null, files, isWebTarget: true);
+            ShowTransferFooter(true);
+            AppLogger.Info($"Card drag-and-drop: sending {files.Length} file(s) to web session '{session.Name}' ({session.Ip})", "Transfer");
+        });
 
         Action toggleCollapse = () =>
         {
@@ -1190,5 +1202,145 @@ public partial class MainWindow : Window
         });
 
         ShowToast(false, true, LocalizationManager.GetString("Str_Devices_Scanning"));
+    }
+
+    private void AttachCardDragDrop(Border cardBorder, StackPanel mainStack, Action<string[]> onFilesDropped)
+    {
+        cardBorder.AllowDrop = true;
+        cardBorder.BorderThickness = new Thickness(2);
+        cardBorder.BorderBrush = System.Windows.Media.Brushes.Transparent;
+        cardBorder.Padding = new Thickness(0);
+
+        var cardGrid = new Grid();
+        mainStack.Margin = new Thickness(16);
+        cardGrid.Children.Add(mainStack);
+
+        var dragOverlay = new Grid
+        {
+            Visibility = Visibility.Collapsed,
+            IsHitTestVisible = false
+        };
+
+        var accentOverlay = new Border
+        {
+            CornerRadius = new CornerRadius(6),
+            Opacity = 0.18
+        };
+        accentOverlay.SetResourceReference(Border.BackgroundProperty, "SystemAccentBrush");
+        dragOverlay.Children.Add(accentOverlay);
+
+        var centerBox = new Border
+        {
+            Width = 46,
+            Height = 46,
+            CornerRadius = new CornerRadius(23),
+            HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+            VerticalAlignment = System.Windows.VerticalAlignment.Center,
+            Effect = new DropShadowEffect
+            {
+                BlurRadius = 14,
+                ShadowDepth = 2,
+                Opacity = 0.35,
+                Color = Colors.Black
+            }
+        };
+        centerBox.SetResourceReference(Border.BackgroundProperty, "SystemAccentBrush");
+
+        var downloadSvg = SvgIconHelper.LoadSvgIcon("download.svg", Colors.White);
+        if (downloadSvg != null)
+        {
+            centerBox.Child = new System.Windows.Controls.Image
+            {
+                Source = downloadSvg,
+                Width = 24,
+                Height = 24,
+                Stretch = Stretch.Uniform,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center
+            };
+        }
+        else
+        {
+            centerBox.Child = new System.Windows.Shapes.Path
+            {
+                Data = Geometry.Parse("M12,3 L12,17 M6,11 L12,17 L18,11 M5,21 L19,21"),
+                Stroke = System.Windows.Media.Brushes.White,
+                StrokeThickness = 2,
+                StrokeStartLineCap = PenLineCap.Round,
+                StrokeEndLineCap = PenLineCap.Round,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                VerticalAlignment = System.Windows.VerticalAlignment.Center
+            };
+        }
+        dragOverlay.Children.Add(centerBox);
+
+        cardGrid.Children.Add(dragOverlay);
+        cardBorder.Child = cardGrid;
+
+        int dragCounter = 0;
+
+        void ShowDragVisuals()
+        {
+            cardBorder.SetResourceReference(Border.BorderBrushProperty, "SystemAccentBrush");
+            dragOverlay.Visibility = Visibility.Visible;
+        }
+
+        void HideDragVisuals()
+        {
+            dragCounter = 0;
+            cardBorder.BorderBrush = System.Windows.Media.Brushes.Transparent;
+            dragOverlay.Visibility = Visibility.Collapsed;
+        }
+
+        cardBorder.DragEnter += (s, e) =>
+        {
+            if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
+            {
+                dragCounter++;
+                e.Effects = System.Windows.DragDropEffects.Copy;
+                e.Handled = true;
+                ShowDragVisuals();
+            }
+            else
+            {
+                e.Effects = System.Windows.DragDropEffects.None;
+            }
+        };
+
+        cardBorder.DragOver += (s, e) =>
+        {
+            if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
+            {
+                e.Effects = System.Windows.DragDropEffects.Copy;
+                e.Handled = true;
+            }
+            else
+            {
+                e.Effects = System.Windows.DragDropEffects.None;
+            }
+        };
+
+        cardBorder.DragLeave += (s, e) =>
+        {
+            dragCounter--;
+            var pos = e.GetPosition(cardBorder);
+            if (dragCounter <= 0 || pos.X <= 0 || pos.Y <= 0 || pos.X >= cardBorder.ActualWidth || pos.Y >= cardBorder.ActualHeight)
+            {
+                HideDragVisuals();
+            }
+        };
+
+        cardBorder.Drop += (s, e) =>
+        {
+            HideDragVisuals();
+            if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
+            {
+                if (e.Data.GetData(System.Windows.DataFormats.FileDrop) is string[] files && files.Length > 0)
+                {
+                    e.Handled = true;
+                    onFilesDropped(files);
+                }
+            }
+        };
     }
 }
