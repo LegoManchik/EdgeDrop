@@ -65,6 +65,8 @@ public static class AppLogger
 {
     private static readonly ObservableCollection<LogEntry> _entries = new();
     private static readonly object _lock = new();
+    private static readonly string LogDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EdgeDrop");
+    private static readonly string LogFilePath = System.IO.Path.Combine(LogDir, "app.log");
     public static ObservableCollection<LogEntry> Entries => _entries;
     public static event Action<LogEntry>? LogAdded;
 
@@ -102,6 +104,13 @@ public static class AppLogger
             {
                 _entries.RemoveAt(0);
             }
+
+            try
+            {
+                if (!System.IO.Directory.Exists(LogDir)) System.IO.Directory.CreateDirectory(LogDir);
+                System.IO.File.AppendAllText(LogFilePath, entry.FormattedLine + Environment.NewLine);
+            }
+            catch { }
         }
 
         LogAdded?.Invoke(entry);

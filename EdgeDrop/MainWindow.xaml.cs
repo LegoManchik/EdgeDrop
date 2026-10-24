@@ -435,6 +435,8 @@ public partial class MainWindow : Window
 
     private void Start()
     {
+        AppLogger.Info($"Start() called. Port={_settings.Port}", "App");
+
         try
         {
             _transferService.StartListening(_settings.Port);
@@ -448,6 +450,18 @@ public partial class MainWindow : Window
             _running = true;
 
             RestartEdges();
+
+            if (_settings.AutoDiscoveryEnabled)
+            {
+                if (_discovery == null)
+                {
+                    InitDiscoveryService();
+                }
+                else
+                {
+                    _discovery.Start();
+                }
+            }
 
             UpdatePowerButtonVisual();
 
@@ -468,8 +482,6 @@ public partial class MainWindow : Window
 
         catch (Exception ex)
         {
-            SetStatus($"Failed to start: {ex.Message}");
-
             AppLogger.Error($"Failed to start services: {ex.Message}", "App");
 
             _running = false;
@@ -477,6 +489,14 @@ public partial class MainWindow : Window
             UpdatePowerButtonVisual();
 
             UpdateWebButtonState();
+
+            if (StatusBadge != null)
+            {
+                StatusBadge.Text = $"{LocalizationManager.GetString("Str_History_Error")}: {ex.Message}";
+                StatusBadge.Foreground = (System.Windows.Media.Brush)FindResource("ErrorBrush");
+            }
+
+            ShowToast(false, false, $"{LocalizationManager.GetString("Str_History_Error")}: {ex.Message}");
         }
     }
 
@@ -918,5 +938,9 @@ public partial class MainWindow : Window
 
     private void SetStatus(string text)
     {
+        if (StatusBadge != null && !_running)
+        {
+            StatusBadge.Text = text;
+        }
     }
 }

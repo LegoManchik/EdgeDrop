@@ -16,6 +16,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Resource Include="icon.ico" />
+    <Resource Include="icon.svg" />
     <Content Include="icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

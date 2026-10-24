@@ -15,6 +15,17 @@ public partial class App : System.Windows.Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        AppDomain.CurrentDomain.UnhandledException += (s, args) =>
+        {
+            AppLogger.Error($"Unhandled AppDomain exception: {args.ExceptionObject}", "Crash");
+        };
+
+        DispatcherUnhandledException += (s, args) =>
+        {
+            AppLogger.Error($"Unhandled UI exception: {args.Exception}", "Dispatcher");
+            args.Handled = true;
+        };
+
         string pipeName = PipePrefix + Environment.UserName;
 
         _singleInstanceMutex = new Mutex(true, "Global\\EdgeDrop_SingleInstance", out bool createdNew);

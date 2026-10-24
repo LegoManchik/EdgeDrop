@@ -125,45 +125,66 @@ public partial class MainWindow : Window
 
     private void RestartEdges()
     {
-        foreach (var edge in _edges)
+        try
         {
-            try { edge.Close(); } catch { }
-        }
-
-        _edges.Clear();
-
-        if (!_running) return;
-
-        var devicesSnapshot = _settings.GetDevicesSnapshot();
-
-        if (devicesSnapshot.Count == 0)
-        {
-            var edge = new EdgeDropWindow(_settings, _transferService, null);
-
-            _edges.Add(edge);
-
-            edge.Show();
-        }
-
-        else
-        {
-            foreach (var dev in devicesSnapshot)
+            foreach (var edge in _edges)
             {
-                var edge = new EdgeDropWindow(_settings, _transferService, dev);
+                try { edge.Close(); } catch { }
+            }
 
-                _edges.Add(edge);
+            _edges.Clear();
 
-                edge.Show();
+            if (!_running) return;
+
+            var devicesSnapshot = _settings.GetDevicesSnapshot();
+
+            if (devicesSnapshot.Count == 0)
+            {
+                try
+                {
+                    var edge = new EdgeDropWindow(_settings, _transferService, null);
+                    _edges.Add(edge);
+                    edge.Show();
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.Warning($"Failed to show default edge: {ex.Message}", "Edges");
+                }
+            }
+            else
+            {
+                foreach (var dev in devicesSnapshot)
+                {
+                    try
+                    {
+                        var edge = new EdgeDropWindow(_settings, _transferService, dev);
+                        _edges.Add(edge);
+                        edge.Show();
+                    }
+                    catch (Exception ex)
+                    {
+                        AppLogger.Warning($"Failed to show edge for {dev.Name}: {ex.Message}", "Edges");
+                    }
+                }
+            }
+
+            if (_settings.WebServerEnabled)
+            {
+                try
+                {
+                    var webEdge = new EdgeDropWindow(_settings, _transferService, null, isWebTarget: true, customEdge: _settings.WebDropEdge);
+                    _edges.Add(webEdge);
+                    webEdge.Show();
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.Warning($"Failed to show web edge: {ex.Message}", "Edges");
+                }
             }
         }
-
-        if (_settings.WebServerEnabled)
+        catch (Exception ex)
         {
-            var webEdge = new EdgeDropWindow(_settings, _transferService, null, isWebTarget: true, customEdge: _settings.WebDropEdge);
-
-            _edges.Add(webEdge);
-
-            webEdge.Show();
+            AppLogger.Warning($"RestartEdges encountered an error: {ex.Message}", "Edges");
         }
     }
 

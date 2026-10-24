@@ -63,18 +63,16 @@ public class FileReceiver
         try
         {
             _listener = new TcpListener(IPAddress.IPv6Any, _port);
-
+            _listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             _listener.Server.DualMode = true;
-
             _listener.Start();
         }
-
         catch (Exception ex)
         {
             AppLogger.Warning($"Failed to start dual-mode IPv6 listener: {ex.Message}. Falling back to IPv4.", "Receiver");
 
             _listener = new TcpListener(IPAddress.Any, _port);
-
+            _listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             _listener.Start();
         }
 
