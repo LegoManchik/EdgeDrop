@@ -597,13 +597,17 @@
                                 <Border x:Name="thumbContainer" Width="16" Height="16" CornerRadius="8"
                                         HorizontalAlignment="Left" Margin="3,0,0,0">
 
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="1" Opacity="0.22" Color="#000000"/>
+                                    </Border.Effect>
+
                                     <Border.RenderTransform>
                                         <TranslateTransform x:Name="thumbTranslate" X="0"/>
                                     </Border.RenderTransform>
 
                                     <Grid>
                                         <Ellipse x:Name="thumbOff" Width="16" Height="16"
-                                                 Fill="{DynamicResource TextForegroundBrush}"/>
+                                                 Fill="White"/>
 
                                         <Ellipse x:Name="thumbOn" Width="16" Height="16"
                                                  Fill="White" Opacity="0"/>

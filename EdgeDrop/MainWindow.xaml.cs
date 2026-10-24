@@ -831,7 +831,7 @@ public partial class MainWindow : Window
             AppLogoDefault.Visibility = Visibility.Collapsed;
         }
 
-        var powerImg = SvgIconHelper.LoadSvgIcon("power.svg", iconColor);
+        var powerImg = SvgIconHelper.LoadSvgIcon("power.svg", Colors.White);
 
         if (powerImg != null && PowerIconCustom != null && PowerIconDefault != null)
         {
