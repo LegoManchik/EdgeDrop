@@ -26,17 +26,31 @@ public class NotificationAggregator
 
     public Action? IncomingRequestClickAction { get; set; }
     public bool IsIncomingRequestPending { get; set; }
+    public Func<bool>? IsActiveTransfer { get; set; }
 
     private class BatchState
     {
         public readonly List<string> Files = new();
-        public System.Timers.Timer Timer;
+        public readonly System.Timers.Timer Timer;
 
-        public BatchState(Action onFlush)
+        public BatchState(Action onFlush, Func<bool>? isActiveTransfer)
         {
-            Timer = new System.Timers.Timer(1500) { AutoReset = false };
+            Timer = new System.Timers.Timer(2200) { AutoReset = false };
 
-            Timer.Elapsed += (_, _) => onFlush();
+            Timer.Elapsed += (_, _) =>
+            {
+                if (isActiveTransfer?.Invoke() == true)
+                {
+                    try
+                    {
+                        Timer.Stop();
+                        Timer.Start();
+                    }
+                    catch { }
+                    return;
+                }
+                onFlush();
+            };
         }
 
         public void Add(string filePath)
@@ -84,6 +98,21 @@ public class NotificationAggregator
         }
     }
 
+    public void FlushDirection(TransferDirection direction)
+    {
+        List<(TransferDirection dir, string dev)> keys;
+
+        lock (_lock)
+        {
+            keys = _batches.Keys.Where(k => k.Item1 == direction).ToList();
+        }
+
+        foreach (var key in keys)
+        {
+            Flush(key.dir, key.dev);
+        }
+    }
+
     public void AttachNotifyIcon(Forms.NotifyIcon notifyIcon)
     {
         _notifyIcon = notifyIcon;
@@ -123,7 +152,7 @@ public class NotificationAggregator
 
             if (!_batches.TryGetValue(key, out var batch))
             {
-                batch = new BatchState(() => Flush(TransferDirection.Received, keyDevice));
+                batch = new BatchState(() => Flush(TransferDirection.Received, keyDevice), IsActiveTransfer);
 
                 _batches[key] = batch;
             }
@@ -142,7 +171,7 @@ public class NotificationAggregator
 
             if (!_batches.TryGetValue(key, out var batch))
             {
-                batch = new BatchState(() => Flush(TransferDirection.Sent, keyDevice));
+                batch = new BatchState(() => Flush(TransferDirection.Sent, keyDevice), IsActiveTransfer);
 
                 _batches[key] = batch;
             }

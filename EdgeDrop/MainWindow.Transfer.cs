@@ -106,7 +106,10 @@ public partial class MainWindow : Window
 
             UpdateQueueDisplay();
 
-            _notifications.FlushAll();
+            if (!_transferService.IsProcessingQueue && _transferService.Queue.Count == 0)
+            {
+                _notifications.FlushDirection(TransferDirection.Sent);
+            }
 
             await Task.Delay(350);
 
@@ -528,19 +531,29 @@ public partial class MainWindow : Window
         string ext = Path.GetExtension(fileName).ToLowerInvariant();
 
         bool isDangerous = FileReceiver.IsDangerousFile(fileName);
+        bool showSafeModeWarning = isDangerous && _settings.SafeModeEnabled;
+
+        if (SafeModeWarningContainer != null)
+        {
+            if (showSafeModeWarning)
+            {
+                SafeModeWarningContainer.Visibility = Visibility.Visible;
+                if (SafeModeWarningIcon != null)
+                {
+                    SafeModeWarningIcon.Source = SvgIconHelper.LoadSvgIcon("triangle-alert.svg", ThemeManager.AccentColor);
+                }
+            }
+            else
+            {
+                SafeModeWarningContainer.Visibility = Visibility.Collapsed;
+            }
+        }
 
         string promptTemplate = LocalizationManager.GetString("Str_Incoming_Prompt");
 
         if (IncomingFilePromptText != null)
         {
-            string basePrompt = string.Format(promptTemplate, fileName, sizeStr, senderLabel);
-
-            if (isDangerous)
-            {
-                basePrompt += "\n⚠️ " + LocalizationManager.GetString("Str_Transfer_DangerousWarning", "Warning: executable file! Running unverified programs may be dangerous.");
-            }
-
-            IncomingFilePromptText.Text = basePrompt;
+            IncomingFilePromptText.Text = string.Format(promptTemplate, fileName, sizeStr, senderLabel);
         }
 
         _incomingFileRemainingSec = 30;
@@ -551,7 +564,7 @@ public partial class MainWindow : Window
 
         _safeModeAcceptTimer?.Stop();
 
-        if (isDangerous && _settings.SafeModeEnabled)
+        if (showSafeModeWarning)
         {
             if (IncomingFileAcceptBtn != null)
             {

@@ -1229,50 +1229,28 @@ public partial class MainWindow : Window
         accentOverlay.SetResourceReference(Border.BackgroundProperty, "SystemAccentBrush");
         dragOverlay.Children.Add(accentOverlay);
 
-        var centerBox = new Border
+        var downloadIcon = new System.Windows.Shapes.Path
         {
-            Width = 46,
-            Height = 46,
-            CornerRadius = new CornerRadius(23),
+            Data = Geometry.Parse("M12,3 L12,17 M6,11 L12,17 L18,11 M5,21 L19,21"),
+            StrokeThickness = 2.5,
+            StrokeStartLineCap = PenLineCap.Round,
+            StrokeEndLineCap = PenLineCap.Round,
+            StrokeLineJoin = PenLineJoin.Round,
+            Width = 32,
+            Height = 32,
+            Stretch = Stretch.Uniform,
             HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
             VerticalAlignment = System.Windows.VerticalAlignment.Center,
             Effect = new DropShadowEffect
             {
-                BlurRadius = 14,
-                ShadowDepth = 2,
+                BlurRadius = 8,
+                ShadowDepth = 1,
                 Opacity = 0.35,
                 Color = Colors.Black
             }
         };
-        centerBox.SetResourceReference(Border.BackgroundProperty, "SystemAccentBrush");
-
-        var downloadSvg = SvgIconHelper.LoadSvgIcon("download.svg", Colors.White);
-        if (downloadSvg != null)
-        {
-            centerBox.Child = new System.Windows.Controls.Image
-            {
-                Source = downloadSvg,
-                Width = 24,
-                Height = 24,
-                Stretch = Stretch.Uniform,
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                VerticalAlignment = System.Windows.VerticalAlignment.Center
-            };
-        }
-        else
-        {
-            centerBox.Child = new System.Windows.Shapes.Path
-            {
-                Data = Geometry.Parse("M12,3 L12,17 M6,11 L12,17 L18,11 M5,21 L19,21"),
-                Stroke = System.Windows.Media.Brushes.White,
-                StrokeThickness = 2,
-                StrokeStartLineCap = PenLineCap.Round,
-                StrokeEndLineCap = PenLineCap.Round,
-                HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                VerticalAlignment = System.Windows.VerticalAlignment.Center
-            };
-        }
-        dragOverlay.Children.Add(centerBox);
+        downloadIcon.SetResourceReference(System.Windows.Shapes.Path.StrokeProperty, "SystemAccentBrush");
+        dragOverlay.Children.Add(downloadIcon);
 
         cardGrid.Children.Add(dragOverlay);
         cardBorder.Child = cardGrid;

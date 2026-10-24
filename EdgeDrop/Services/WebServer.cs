@@ -513,6 +513,9 @@ public class WebServer : IAsyncDisposable, IDisposable
                         SenderApprovalManager.Approve(clientIp);
                     }
 
+                    SenderApprovalManager.NotifyTransferStarted(clientIp);
+                    try
+                    {
                     var receivedNames = new List<string>();
 
                     Directory.CreateDirectory(_saveFolder);
@@ -590,6 +593,11 @@ public class WebServer : IAsyncDisposable, IDisposable
                     }
 
                     return Results.Ok(new { received = receivedNames });
+                    }
+                    finally
+                    {
+                        SenderApprovalManager.NotifyTransferEnded(clientIp);
+                    }
                 }
 
                 catch (Exception ex)

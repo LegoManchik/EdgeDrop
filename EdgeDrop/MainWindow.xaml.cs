@@ -43,6 +43,7 @@ public partial class MainWindow : Window
         WireTransferServiceEvents();
 
         _notifications = new NotificationAggregator(_settings);
+        _notifications.IsActiveTransfer = () => _transferService != null && (_transferService.IsProcessingQueue || _transferService.IsReceiving);
 
         _notifications.StatusMessage += msg => Dispatcher.Invoke(() => SetStatus(msg));
 
@@ -884,6 +885,15 @@ public partial class MainWindow : Window
         if (xImg != null && DiagnosticsCloseIcon != null)
         {
             DiagnosticsCloseIcon.Source = xImg;
+        }
+
+        if (SafeModeWarningIcon != null)
+        {
+            var alertImg = SvgIconHelper.LoadSvgIcon("triangle-alert.svg", ThemeManager.AccentColor);
+            if (alertImg != null)
+            {
+                SafeModeWarningIcon.Source = alertImg;
+            }
         }
 
         var webImg = SvgIconHelper.LoadSvgIcon("monitor-smartphone.svg", iconColor);

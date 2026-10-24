@@ -170,7 +170,7 @@ public static class LocalizationManager
         ["Str_Settings_ThemeDesc"] = "Настройте готовые темы или создайте собственную палитру:",
         ["Str_Theme_Dark"] = "Тёмная тема",
         ["Str_Theme_Light"] = "Светлая тема",
-        ["Str_Settings_PresetsTitle"] = "Готовые темы (пресеты)",
+        ["Str_Settings_PresetsTitle"] = "Готовые темы",
         ["Str_Settings_PresetsDesc"] = "Выберите готовую тему — квадратные плитки палитр (фон + акцент):",
         ["Str_Settings_CustomThemeTitle"] = "Своя тема",
         ["Str_Settings_CustomThemeDesc"] = "Нажмите на цвет для вызова цветового круга и настройки оттенка:",

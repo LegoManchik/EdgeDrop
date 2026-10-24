@@ -353,6 +353,7 @@ public class FileReceiver
                             }
                         }
 
+                        SenderApprovalManager.NotifyTransferStarted(remoteIp);
                         ReceiveStarted?.Invoke(fileName, size);
 
                         using var sha = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
@@ -469,6 +470,8 @@ public class FileReceiver
 
                     finally
                     {
+                        SenderApprovalManager.NotifyTransferEnded(remoteIp);
+
                         if (!transferSucceeded)
                         {
                             ReceiveCancelled?.Invoke(fileName);
