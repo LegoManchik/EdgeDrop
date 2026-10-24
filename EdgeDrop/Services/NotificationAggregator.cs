@@ -197,22 +197,22 @@ public class NotificationAggregator
         {
             title = direction == TransferDirection.Received
 
-                ? (isRu ? string.Format(LocalizationManager.GetString("Str_Notification_FilesReceived", "Files received: {0}"), totalCount) : $"Files received: {totalCount}") + deviceTitle
+                ? (isRu ? LocalizationManager.GetString("Str_Notification_FilesReceived", totalCount) : $"Files received: {totalCount}") + deviceTitle
 
-                : (isRu ? string.Format(LocalizationManager.GetString("Str_Notification_FilesSent", "Files sent: {0}"), totalCount) : $"Files sent: {totalCount}") + deviceTitle;
+                : (isRu ? LocalizationManager.GetString("Str_Notification_FilesSent", totalCount) : $"Files sent: {totalCount}") + deviceTitle;
 
             body = isRu
 
-                ? $"{maskedFirst} " + string.Format(LocalizationManager.GetString("Str_Notification_AndMore", "and {0} more"), totalCount - 1) + " " + GetPluralFiles(totalCount - 1)
+                ? $"{maskedFirst} " + LocalizationManager.GetString("Str_Notification_AndMore", totalCount - 1) + " " + GetPluralFiles(totalCount - 1)
 
                 : $"{maskedFirst} and {totalCount - 1} more";
         }
 
         StatusMessage?.Invoke(direction == TransferDirection.Received
 
-            ? (isRu ? string.Format(LocalizationManager.GetString("Str_Notification_ReceivedPrefix", "Received: {0}"), body) : $"Received: {body}")
+            ? (isRu ? LocalizationManager.GetString("Str_Notification_ReceivedPrefix", body) : $"Received: {body}")
 
-            : (isRu ? string.Format(LocalizationManager.GetString("Str_Notification_SentPrefix", "Sent: {0}"), body) : $"Sent: {body}"));
+            : (isRu ? LocalizationManager.GetString("Str_Notification_SentPrefix", body) : $"Sent: {body}"));
 
         if (_settings.NotificationsEnabled && _notifyIcon != null)
         {

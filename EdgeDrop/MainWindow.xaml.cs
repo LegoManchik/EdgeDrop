@@ -465,7 +465,7 @@ public partial class MainWindow : Window
 
             UpdatePowerButtonVisual();
 
-            SetStatus(string.Format(LocalizationManager.GetString("Str_Status_Listening", "Listening on port {0}, folder: {1}"), _settings.Port, _settings.SaveFolder));
+            SetStatus(LocalizationManager.GetString("Str_Status_Listening", _settings.Port, _settings.SaveFolder));
 
             AppLogger.Info("Transfer service activated (ON)", "App");
 
@@ -493,7 +493,7 @@ public partial class MainWindow : Window
             if (StatusBadge != null)
             {
                 StatusBadge.Text = $"{LocalizationManager.GetString("Str_History_Error")}: {ex.Message}";
-                StatusBadge.Foreground = (System.Windows.Media.Brush)FindResource("ErrorBrush");
+                StatusBadge.Foreground = new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0x52, 0x52));
             }
 
             ShowToast(false, false, $"{LocalizationManager.GetString("Str_History_Error")}: {ex.Message}");
@@ -549,7 +549,7 @@ public partial class MainWindow : Window
             {
                 StatusBadge.Text = LocalizationManager.GetString("Str_Service_Active");
 
-                StatusBadge.Foreground = new SolidColorBrush(accent);
+                StatusBadge.SetResourceReference(TextBlock.ForegroundProperty, "SystemAccentBrush");
             }
         }
 
@@ -570,7 +570,7 @@ public partial class MainWindow : Window
             {
                 StatusBadge.Text = LocalizationManager.GetString("Str_Service_Stopped");
 
-                StatusBadge.Foreground = (System.Windows.Media.Brush)System.Windows.Application.Current.Resources["SubtleTextBrush"];
+                StatusBadge.SetResourceReference(TextBlock.ForegroundProperty, "SubtleTextBrush");
             }
         }
 

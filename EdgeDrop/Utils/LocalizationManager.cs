@@ -56,14 +56,28 @@ public static class LocalizationManager
 
         if (res != null && res.Contains(key) && res[key] is string val)
         {
-            return args.Length > 0 ? string.Format(val, args) : val;
+            try
+            {
+                return args.Length > 0 ? string.Format(val, args) : val;
+            }
+            catch
+            {
+                return val;
+            }
         }
 
         var fallback = EffectiveLanguage == AppLanguage.English ? GetEnglishDictionary() : GetRussianDictionary();
 
         if (fallback.TryGetValue(key, out var str))
         {
-            return args.Length > 0 ? string.Format(str, args) : str;
+            try
+            {
+                return args.Length > 0 ? string.Format(str, args) : str;
+            }
+            catch
+            {
+                return str;
+            }
         }
 
         return key;
