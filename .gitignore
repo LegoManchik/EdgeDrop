@@ -1,0 +1,31 @@
+## Visual Studio & IDE
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.docstates
+*.ide
+
+## Build & Output Directories
+[Bb]in/
+[Oo]bj/
+publish/
+installer_output/
+*.tmp
+*.log
+
+## User Data & Runtime State
+*.edpart
+history.json
+settings.json
+
+## Scratch & Temporary Workspace
+scratch/
+.system_generated/
+
+## OS Generated
+Thumbs.db
+desktop.ini
+.DS_Store

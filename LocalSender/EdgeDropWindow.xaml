@@ -1,0 +1,19 @@
+<Window x:Class="EdgeDrop.EdgeDropWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="EdgeDrop"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True"
+        ResizeMode="NoResize"
+        Width="14"
+        Height="800"
+        AllowDrop="True">
+    <Border x:Name="DropBorder" Background="#01FFFFFF">
+        <Border.Effect>
+            <DropShadowEffect x:Name="GlowEffect" BlurRadius="24" ShadowDepth="0" Color="#0078D4" Opacity="0"/>
+        </Border.Effect>
+    </Border>
+</Window>

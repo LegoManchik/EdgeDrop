@@ -1,0 +1,3956 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
+<meta name="theme-color" content="#202020">
+
+<title>EdgeDrop</title>
+
+<style>
+
+:root {
+
+  --bg: #202020;
+
+  --card: #2B2B2B;
+
+  --card-stroke: rgba(255, 255, 255, 0.07);
+
+  --nav: #252525;
+
+  --btn: #1E252B;
+
+  --btn-hover: #262F37;
+
+  --accent: #0078D4;
+
+  --accent-hover: #1A86D9;
+
+  --text: #F3F3F3;
+
+  --subtext: #9E9E9E;
+
+  --success: #54B054;
+
+  --error: #FF5252;
+
+  --radius: 12px;
+
+  --border: transparent;
+
+  --card-stroke: transparent;
+
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  background: var(--bg);
+
+  color: var(--text);
+
+  min-height: 100vh;
+
+  display: flex;
+
+  flex-direction: column;
+
+  padding: 0;
+
+  overflow-x: hidden;
+
+  transition: background-color 0.25s ease, color 0.25s ease;
+
+}
+
+
+
+/* Toast Overlay System */
+
+.toast-container {
+
+  position: fixed;
+
+  top: 14px;
+
+  left: 0;
+
+  right: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 8px;
+
+  z-index: 99999;
+
+  pointer-events: none;
+
+  padding: 0 16px;
+
+}
+
+.toast {
+
+  pointer-events: auto;
+
+  min-width: 260px;
+
+  max-width: 420px;
+
+  width: 100%;
+
+  background: var(--card);
+
+  border: none;
+
+  border-radius: 12px;
+
+  padding: 12px 16px;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  transform: translateY(-40px) scale(0.95);
+
+  opacity: 0;
+
+  transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.25s ease;
+
+}
+
+.toast.show {
+
+  transform: translateY(0) scale(1);
+
+  opacity: 1;
+
+}
+
+.toast-icon {
+
+  width: 24px;
+
+  height: 24px;
+
+  border-radius: 12px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex-shrink: 0;
+
+}
+
+.toast-icon svg { width: 14px; height: 14px; stroke-width: 2.5; fill: none; stroke: currentColor; }
+
+.toast-success .toast-icon { background: rgba(84, 176, 84, 0.2); color: var(--success); }
+
+.toast-error .toast-icon { background: rgba(255, 82, 82, 0.2); color: var(--error); }
+
+.toast-info .toast-icon { background: rgba(0, 120, 212, 0.2); color: var(--accent); }
+
+.toast-text {
+
+  flex: 1;
+
+  font-size: 13.5px;
+
+  font-weight: 500;
+
+  color: var(--text);
+
+  line-height: 1.35;
+
+  word-break: break-word;
+
+}
+
+.toast-close {
+
+  background: none;
+
+  border: none;
+
+  color: var(--subtext);
+
+  cursor: pointer;
+
+  padding: 4px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border-radius: 6px;
+
+  flex-shrink: 0;
+
+}
+
+.toast-close svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+
+
+/* Auth Screen */
+
+.auth-screen {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-height: 100vh;
+
+  padding: 24px 16px;
+
+  box-sizing: border-box;
+
+}
+
+.auth-card {
+
+  background: var(--card);
+
+  border: none;
+
+  border-radius: var(--radius);
+
+  padding: 36px 24px 30px;
+
+  width: 100%;
+
+  max-width: 360px;
+
+  text-align: center;
+
+  box-shadow: 0 12px 36px rgba(0,0,0,0.18);
+
+  box-sizing: border-box;
+
+}
+
+.auth-brand {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+
+}
+
+.auth-brand svg {
+
+  width: 40px;
+
+  height: 40px;
+
+  flex-shrink: 0;
+
+}
+
+.auth-brand h2 {
+
+  font-size: 24px;
+
+  font-weight: 700;
+
+  margin: 0;
+
+  letter-spacing: -0.4px;
+
+}
+
+.auth-instruction {
+
+  font-size: 13.5px;
+
+  color: var(--muted);
+
+  margin: 0 0 24px 0;
+
+  line-height: 1.45;
+
+}
+
+.pin-grid {
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 16px;
+
+}
+
+.pin-cell {
+
+  width: 52px;
+
+  height: 60px;
+
+  font-size: 28px;
+
+  font-weight: 700;
+
+  text-align: center;
+
+  border-radius: 12px;
+
+  border: 2px solid transparent;
+
+  background: var(--bg);
+
+  color: var(--text);
+
+  outline: none;
+
+  transition: all 0.18s ease;
+
+  box-sizing: border-box;
+
+  -webkit-appearance: none;
+
+}
+
+.pin-cell:focus {
+
+  border-color: var(--accent);
+
+  background: rgba(0, 120, 212, 0.06);
+
+  box-shadow: 0 0 0 3px var(--accent-glow);
+
+  transform: translateY(-2px);
+
+}
+
+.pin-cell.filled {
+
+  border-color: rgba(255, 255, 255, 0.25);
+
+}
+
+.auth-error {
+
+  color: #EF4444;
+
+  font-size: 13px;
+
+  font-weight: 500;
+
+  margin-bottom: 14px;
+
+}
+
+.auth-btn {
+
+  margin-top: 4px !important;
+
+  width: 100%;
+
+}
+
+
+
+/* Main Container */
+
+.app-container {
+
+  width: 100%;
+
+  max-width: 460px;
+
+  margin: 0 auto;
+
+  padding: 16px 16px 84px 16px;
+
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+}
+
+
+
+/* Header */
+
+.header {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-top: 4px;
+
+  margin-bottom: 20px;
+
+}
+
+.header-brand {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+}
+
+.header-brand svg { width: 32px; height: 32px; flex-shrink: 0; }
+
+.header-brand h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+
+.header-status {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  font-size: 11.5px;
+
+  font-weight: 500;
+
+  color: var(--success);
+
+  background: rgba(84, 176, 84, 0.12);
+
+  padding: 4px 10px;
+
+  border-radius: 12px;
+
+}
+
+.header-status-dot {
+
+  width: 7px;
+
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: var(--success);
+
+}
+
+
+
+/* Tab Pages */
+
+.tab-page {
+
+  display: none;
+
+  animation: fadeIn 0.18s ease-out;
+
+}
+
+.tab-page.active {
+
+  display: block;
+
+}
+
+@keyframes fadeIn {
+
+  from { opacity: 0; transform: translateY(4px); }
+
+  to { opacity: 1; transform: translateY(0); }
+
+}
+
+
+
+/* Cards */
+
+.card {
+
+  width: 100%;
+
+  background: var(--card);
+
+  border: none;
+
+  border-radius: var(--radius);
+
+  padding: 20px 18px;
+
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+
+  margin-bottom: 16px;
+
+}
+
+.card-header-row {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 14px;
+
+}
+
+.card-title {
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  letter-spacing: -0.2px;
+
+  margin-bottom: 14px;
+
+}
+
+
+
+/* Home: Drop Zone */
+
+.drop-zone {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 30px 16px;
+
+  background: var(--btn);
+
+  border: none;
+
+  border-radius: var(--radius);
+
+  cursor: pointer;
+
+  transition: background 0.2s, transform 0.15s;
+
+  text-align: center;
+
+}
+
+.drop-zone:hover { background: var(--btn-hover); }
+
+.drop-zone:active { transform: scale(0.985); }
+
+.drop-icon {
+
+  width: 44px;
+
+  height: 44px;
+
+  stroke: var(--accent);
+
+  stroke-width: 2;
+
+  stroke-linecap: round;
+
+  stroke-linejoin: round;
+
+  fill: none;
+
+  margin-bottom: 10px;
+
+}
+
+.drop-title { font-size: 15px; font-weight: 600; }
+
+#fileInput { display: none; }
+
+
+
+/* PC File List in Download Card */
+
+.pc-file-list {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+  max-height: 250px;
+
+  overflow-y: auto;
+
+  margin-bottom: 14px;
+
+  padding-right: 2px;
+
+}
+
+.pc-file-item {
+
+  display: flex;
+
+  align-items: center;
+
+  padding: 10px 12px;
+
+  background: var(--btn);
+
+  border: none;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  transition: background 0.15s;
+
+  user-select: none;
+
+}
+
+.pc-file-item:hover {
+
+  background: var(--btn-hover);
+
+}
+
+.pc-file-item.selected {
+
+  background: rgba(0, 120, 212, 0.12);
+
+}
+
+.pc-file-cb, .pc-select-all-label input[type="checkbox"] {
+
+  appearance: none;
+
+  -webkit-appearance: none;
+
+  width: 19px;
+
+  height: 19px;
+
+  border-radius: 5px;
+
+  border: 1.5px solid rgba(140, 140, 140, 0.45);
+
+  background: var(--btn);
+
+  margin: 0 12px 0 0;
+
+  flex-shrink: 0;
+
+  cursor: pointer;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  position: relative;
+
+  transition: all 0.15s ease;
+
+  vertical-align: middle;
+
+}
+
+.pc-select-all-label input[type="checkbox"] {
+
+  margin: 0 8px 0 0;
+
+  width: 17px;
+
+  height: 17px;
+
+}
+
+.pc-file-cb:hover, .pc-select-all-label input[type="checkbox"]:hover {
+
+  border-color: var(--accent);
+
+}
+
+.pc-file-cb:checked, .pc-select-all-label input[type="checkbox"]:checked {
+
+  background: var(--accent);
+
+  border-color: var(--accent);
+
+}
+
+.pc-file-cb:checked::after {
+
+  content: '';
+
+  width: 4px;
+
+  height: 8px;
+
+  border: solid white;
+
+  border-width: 0 2px 2px 0;
+
+  transform: rotate(45deg);
+
+  position: absolute;
+
+  top: 3px;
+
+  left: 6px;
+
+}
+
+.pc-select-all-label input[type="checkbox"]:checked::after {
+
+  content: '';
+
+  width: 3.5px;
+
+  height: 7px;
+
+  border: solid white;
+
+  border-width: 0 2px 2px 0;
+
+  transform: rotate(45deg);
+
+  position: absolute;
+
+  top: 3px;
+
+  left: 5px;
+
+}
+
+.pc-files-toolbar {
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 10px;
+
+  padding: 2px 2px;
+
+  font-size: 13px;
+
+}
+
+.pc-select-all-label {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  cursor: pointer;
+
+  user-select: none;
+
+  font-weight: 500;
+
+  color: var(--text);
+
+}
+
+.pc-selected-count-badge {
+
+  font-size: 12px;
+
+  color: var(--subtext);
+
+  font-weight: 500;
+
+}
+
+.pc-file-icon {
+
+  width: 24px;
+
+  height: 24px;
+
+  margin-right: 10px;
+
+  flex-shrink: 0;
+
+  color: var(--subtext);
+
+}
+
+.pc-file-item.selected .pc-file-icon {
+
+  color: var(--accent);
+
+}
+
+.pc-file-details {
+
+  flex: 1;
+
+  min-width: 0;
+
+  text-align: left;
+
+}
+
+.pc-file-name {
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: var(--text);
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+}
+
+.pc-file-meta {
+
+  font-size: 11.5px;
+
+  color: var(--subtext);
+
+  margin-top: 2px;
+
+}
+
+
+
+/* File Offer Modal */
+
+.modal-overlay {
+
+  position: fixed;
+
+  top: 0;
+
+  left: 0;
+
+  right: 0;
+
+  bottom: 0;
+
+  background: rgba(0, 0, 0, 0.65);
+
+  backdrop-filter: blur(8px);
+
+  -webkit-backdrop-filter: blur(8px);
+
+  z-index: 2000;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 20px;
+
+  animation: fadeIn 0.2s ease;
+
+}
+
+.modal-card {
+
+  width: 100%;
+
+  max-width: 360px;
+
+  background: var(--card);
+
+  border: none;
+
+  border-radius: 16px;
+
+  padding: 22px 20px;
+
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+
+  text-align: center;
+
+  animation: modalScale 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+}
+
+@keyframes modalScale {
+
+  from { transform: scale(0.92); opacity: 0; }
+
+  to { transform: scale(1); opacity: 1; }
+
+}
+
+.modal-badge {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  background: var(--btn);
+
+  color: var(--accent);
+
+  padding: 6px 12px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  margin-bottom: 14px;
+
+}
+
+.offer-file-icon {
+
+  margin-bottom: 12px;
+
+}
+
+.offer-file-name {
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  color: var(--text);
+
+  word-break: break-all;
+
+  margin-bottom: 4px;
+
+}
+
+.offer-file-size {
+
+  font-size: 13px;
+
+  color: var(--subtext);
+
+  margin-bottom: 12px;
+
+}
+
+.offer-question {
+
+  font-size: 14px;
+
+  color: var(--text);
+
+  margin-bottom: 20px;
+
+}
+
+.modal-actions {
+
+  display: flex;
+
+  gap: 10px;
+
+}
+
+.btn-secondary {
+
+  flex: 1;
+
+  padding: 12px 14px;
+
+  background: var(--btn);
+
+  color: var(--text);
+
+  border: none;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background 0.15s;
+
+}
+
+.btn-secondary:hover {
+
+  background: var(--btn-hover);
+
+}
+
+
+
+.selected-info {
+
+  display: none;
+
+  margin-top: 14px;
+
+  padding: 12px 14px;
+
+  background: var(--btn);
+
+  border: none;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+
+  color: var(--text);
+
+  justify-content: space-between;
+
+  align-items: center;
+
+}
+
+.selected-left {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+
+}
+
+.selected-count { font-weight: 600; }
+
+.selected-size { font-size: 11.5px; color: var(--subtext); }
+
+.btn-clear {
+
+  background: none;
+
+  border: none;
+
+  color: var(--subtext);
+
+  font-size: 12.5px;
+
+  cursor: pointer;
+
+  padding: 4px 8px;
+
+  border-radius: 6px;
+
+}
+
+.btn-clear:hover { color: var(--error); }
+
+
+
+.btn-primary {
+
+  width: 100%;
+
+  margin-top: 16px;
+
+  background: var(--accent);
+
+  color: #FFFFFF;
+
+  border: none;
+
+  border-radius: 8px;
+
+  padding: 13px;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  transition: opacity 0.2s, transform 0.1s;
+
+}
+
+.btn-primary:active { transform: scale(0.985); }
+
+.btn-primary:disabled { opacity: 0.45; pointer-events: none; }
+
+.btn-primary svg { width: 16px; height: 16px; stroke: #FFFFFF; stroke-width: 2; fill: none; }
+
+
+
+.progress-container {
+
+  display: none;
+
+  margin-top: 18px;
+
+}
+
+.progress-header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  margin-bottom: 8px;
+
+}
+
+.progress-bar-bg {
+
+  width: 100%;
+
+  height: 8px;
+
+  background: var(--btn);
+
+  border-radius: 4px;
+
+  overflow: hidden;
+
+}
+
+.progress-bar-fill {
+
+  height: 100%;
+
+  width: 0%;
+
+  background: var(--accent);
+
+  border-radius: 4px;
+
+  transition: width 0.15s ease-out;
+
+}
+
+
+
+/* History Page */
+
+.history-empty {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 40px 16px;
+
+  text-align: center;
+
+}
+
+.history-empty-icon {
+
+  width: 48px;
+
+  height: 48px;
+
+  stroke: var(--subtext);
+
+  stroke-width: 1.5;
+
+  fill: none;
+
+  opacity: 0.5;
+
+  margin-bottom: 12px;
+
+}
+
+.history-empty-title { font-size: 14px; font-weight: 600; color: var(--subtext); }
+
+
+
+.history-action-btn {
+
+  background: var(--btn);
+
+  border: none;
+
+  color: var(--subtext);
+
+  font-size: 12px;
+
+  padding: 5px 10px;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  transition: color 0.15s;
+
+}
+
+.history-action-btn:hover { color: var(--error); }
+
+
+
+#tab-history .card {
+
+  max-height: calc(100vh - 160px);
+
+  display: flex;
+
+  flex-direction: column;
+
+  overflow: hidden;
+
+}
+
+#historyList {
+
+  overflow-y: auto;
+
+  flex: 1;
+
+  padding-right: 4px;
+
+  -webkit-overflow-scrolling: touch;
+
+}
+
+
+
+.file-list {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+}
+
+.file-item {
+
+  display: flex;
+
+  align-items: center;
+
+  background: var(--btn);
+
+  border: none;
+
+  padding: 12px 14px;
+
+  border-radius: 8px;
+
+  gap: 12px;
+
+}
+
+.file-check {
+
+  width: 24px;
+
+  height: 24px;
+
+  border-radius: 12px;
+
+  background: rgba(84, 176, 84, 0.2);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex-shrink: 0;
+
+}
+
+.file-check svg { width: 13px; height: 13px; stroke: var(--success); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+.file-info { flex: 1; min-width: 0; }
+
+.file-name { font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.file-meta { font-size: 11px; color: var(--subtext); margin-top: 2px; }
+
+
+
+/* Settings Page */
+
+.settings-group {
+
+  margin-bottom: 20px;
+
+}
+
+.settings-group:last-child { margin-bottom: 0; }
+
+.settings-label {
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  margin-bottom: 10px;
+
+}
+
+.segmented-control {
+
+  display: flex;
+
+  background: var(--btn);
+
+  border: none;
+
+  border-radius: 8px;
+
+  padding: 3px;
+
+  gap: 4px;
+
+}
+
+.segment-btn {
+
+  flex: 1;
+
+  background: transparent;
+
+  border: none;
+
+  color: var(--subtext);
+
+  font-size: 12.5px;
+
+  font-weight: 500;
+
+  padding: 8px 6px;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  transition: background 0.18s, color 0.18s;
+
+  text-align: center;
+
+}
+
+.segment-btn.active {
+
+  background: var(--card);
+
+  color: var(--text);
+
+  font-weight: 600;
+
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+
+}
+
+
+
+.preset-grid {
+
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 10px;
+
+}
+
+.preset-item {
+
+  aspect-ratio: 1;
+
+  border-radius: 8px;
+
+  position: relative;
+
+  cursor: pointer;
+
+  border: 2px solid transparent;
+
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+
+  transition: transform 0.15s, border-color 0.15s;
+
+  overflow: hidden;
+
+}
+
+.preset-item:active { transform: scale(0.95); }
+
+.preset-item.active {
+
+  border-color: #FFFFFF;
+
+  box-shadow: 0 0 0 1px var(--accent), 0 4px 12px rgba(0,0,0,0.3);
+
+}
+
+.preset-accent-badge {
+
+  position: absolute;
+
+  right: 5px;
+
+  bottom: 5px;
+
+  width: 16px;
+
+  height: 16px;
+
+  border-radius: 4px;
+
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+
+}
+
+.preset-check {
+
+  position: absolute;
+
+  top: 4px;
+
+  left: 4px;
+
+  width: 14px;
+
+  height: 14px;
+
+  display: none;
+
+}
+
+.preset-item.active .preset-check { display: block; }
+
+
+
+/* Bottom Navigation Bar */
+
+.bottom-nav {
+
+  position: fixed;
+
+  bottom: 0;
+
+  left: 0;
+
+  right: 0;
+
+  height: 62px;
+
+  background: var(--nav);
+
+  border-top: none;
+
+  display: flex;
+
+  justify-content: space-around;
+
+  align-items: center;
+
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+
+  z-index: 1000;
+
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.22);
+
+  backdrop-filter: blur(12px);
+
+  -webkit-backdrop-filter: blur(12px);
+
+}
+
+.nav-item {
+
+  flex: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 3px;
+
+  background: none;
+
+  border: none;
+
+  color: var(--subtext);
+
+  cursor: pointer;
+
+  padding: 8px 0;
+
+  transition: color 0.18s ease;
+
+  user-select: none;
+
+}
+
+.nav-item svg {
+
+  width: 22px;
+
+  height: 22px;
+
+  stroke: currentColor;
+
+  stroke-width: 2;
+
+  fill: none;
+
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.18s ease;
+
+}
+
+.nav-item span {
+
+  font-size: 11px;
+
+  font-weight: 500;
+
+  letter-spacing: 0.1px;
+
+}
+
+.nav-item.active {
+
+  color: var(--accent);
+
+}
+
+.nav-item.active svg {
+
+  transform: scale(1.15);
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+
+<div id="toastContainer" class="toast-container"></div>
+
+
+
+<div id="fileOfferModal" class="modal-overlay" style="display:none;">
+
+  <div class="modal-card">
+
+    <div class="modal-badge">
+
+      <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;">
+
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+
+        <polyline points="7 10 12 15 17 10"/>
+
+        <line x1="12" y1="15" x2="12" y2="3"/>
+
+      </svg>
+
+      <span data-i18n="offer_title">File from Computer</span>
+
+    </div>
+
+    <div class="offer-file-icon">
+
+      <svg viewBox="0 0 24 24" style="width:42px;height:42px;stroke:var(--accent);fill:none;stroke-width:1.8;">
+
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+        <polyline points="14 2 14 8 20 8"></polyline>
+
+        <line x1="12" y1="18" x2="12" y2="12"></line>
+
+        <polyline points="9 15 12 18 15 15"></polyline>
+
+      </svg>
+
+    </div>
+
+    <div class="offer-file-name" id="offerFileName">file.ext</div>
+
+    <div class="offer-file-size" id="offerFileSize">0 KB</div>
+
+    <div class="offer-question" data-i18n="offer_question">Download this file to phone?</div>
+
+    <div class="modal-actions">
+
+      <button id="offerDismissBtn" class="btn-secondary" data-i18n="btn_dismiss">Dismiss</button>
+
+      <button id="offerDownloadBtn" class="btn-primary" style="margin-top:0;" data-i18n="btn_download">Download</button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<div id="auth" class="auth-screen">
+
+  <div class="auth-card">
+
+    <div class="auth-brand">
+
+      <svg viewBox="0 0 256 256">
+
+        <rect width="256" height="256" rx="67" fill="var(--accent)"/>
+
+        <path d="M100 78 L51 128 L100 178" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+        <path d="M51 128 L166 128" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <path d="M199 185 L199 70" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+
+      </svg>
+
+      <h2>EdgeDrop</h2>
+
+    </div>
+
+    <p class="auth-instruction">Enter the 4-digit PIN from PC screen</p>
+
+    <div class="pin-grid">
+
+      <input type="tel" inputmode="numeric" maxlength="1" class="pin-cell" data-idx="0" autocomplete="off" autofocus />
+
+      <input type="tel" inputmode="numeric" maxlength="1" class="pin-cell" data-idx="1" autocomplete="off" />
+
+      <input type="tel" inputmode="numeric" maxlength="1" class="pin-cell" data-idx="2" autocomplete="off" />
+
+      <input type="tel" inputmode="numeric" maxlength="1" class="pin-cell" data-idx="3" autocomplete="off" />
+
+    </div>
+
+    <div id="authError" class="auth-error" style="display:none;">Invalid PIN code</div>
+
+    <button id="loginBtn" class="btn-primary auth-btn" onclick="tryLogin()">Login</button>
+
+  </div>
+
+</div>
+
+
+
+<div id="app" style="display:none;">
+
+<div class="app-container">
+
+
+
+  <div class="header">
+
+    <div class="header-brand">
+
+      <svg viewBox="0 0 256 256">
+
+        <rect width="256" height="256" rx="67" fill="var(--accent)"/>
+
+        <path d="M100 78 L51 128 L100 178" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+        <path d="M51 128 L166 128" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <path d="M199 185 L199 70" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+
+      </svg>
+
+      <h1>EdgeDrop</h1>
+
+    </div>
+
+  </div>
+
+
+
+  <div id="tab-history" class="tab-page">
+
+    <div class="card">
+
+      <div class="card-header-row">
+
+        <div class="card-title" style="margin-bottom:0;" data-i18n="history_title">Transfer History</div>
+
+        <button id="clearHistoryBtn" class="history-action-btn" data-i18n="history_clear">Clear</button>
+
+      </div>
+
+
+
+      <div id="historyEmpty" class="history-empty">
+
+        <svg class="history-empty-icon" viewBox="0 0 24 24">
+
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+
+          <path d="M3 3v5h5"/>
+
+          <path d="M12 7v5l4 2"/>
+
+        </svg>
+
+        <div class="history-empty-title" data-i18n="history_empty">History is empty</div>
+
+      </div>
+
+
+
+      <div id="historyList" class="file-list" style="display:none;"></div>
+
+    </div>
+
+  </div>
+
+
+
+  <div id="tab-home" class="tab-page active">
+
+    <div class="card">
+
+      <div class="card-title" data-i18n="home_title">Upload to Computer</div>
+
+
+
+      <div class="drop-zone" id="dropZone">
+
+        <svg class="drop-icon" viewBox="0 0 24 24">
+
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+
+          <polyline points="17 8 12 3 7 8"/>
+
+          <line x1="12" y1="3" x2="12" y2="15"/>
+
+        </svg>
+
+        <div class="drop-title" data-i18n="drop_title">Select files</div>
+
+      </div>
+
+      <input type="file" id="fileInput" multiple>
+
+
+
+      <div class="selected-info" id="selectedInfo">
+
+        <div class="selected-left">
+
+          <span class="selected-count" id="selectedCount">0 files</span>
+
+          <span class="selected-size" id="selectedSize">0 MB</span>
+
+        </div>
+
+        <button class="btn-clear" id="cancelSelectBtn" data-i18n="btn_clear">Clear</button>
+
+      </div>
+
+
+
+      <button class="btn-primary" id="uploadBtn" disabled>
+
+        <svg viewBox="0 0 24 24">
+
+          <path d="M12 19V5M5 12l7-7 7 7"/>
+
+        </svg>
+
+        <span data-i18n="btn_send">Send to PC</span>
+
+      </button>
+
+
+
+      <div class="progress-container" id="progressContainer">
+
+        <div class="progress-header">
+
+          <span id="progressStatus" data-i18n="uploading">Uploading...</span>
+
+          <span id="progressPercent">0%</span>
+
+        </div>
+
+        <div class="progress-bar-bg">
+
+          <div class="progress-bar-fill" id="progressBar"></div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <div class="card">
+
+      <div class="card-header-row">
+
+        <div class="card-title" style="margin-bottom:0;" data-i18n="download_card_title">Download from PC</div>
+
+        <button id="refreshDownloadBtn" class="history-action-btn" title="Refresh" style="display:inline-flex;align-items:center;padding:4px 8px;">
+
+          <svg style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2;" viewBox="0 0 24 24">
+
+            <polyline points="23 4 23 10 17 10"></polyline>
+
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+
+          </svg>
+
+        </button>
+
+      </div>
+
+
+
+      <div id="pcFilesToolbar" class="pc-files-toolbar" style="display:none;">
+
+        <label class="pc-select-all-label">
+
+          <input type="checkbox" id="selectAllPcFiles">
+
+          <span data-i18n="select_all">Select all</span>
+
+        </label>
+
+        <span id="selectedPcCountBadge" class="pc-selected-count-badge">Selected 0</span>
+
+      </div>
+
+
+
+      <div id="pcFileList" class="pc-file-list"></div>
+
+
+
+      <div id="pcFilesEmpty" class="history-empty" style="padding: 24px 0; display: none;">
+
+        <svg class="history-empty-icon" viewBox="0 0 24 24">
+
+          <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+
+          <polyline points="13 2 13 9 20 9"></polyline>
+
+        </svg>
+
+        <div class="history-empty-title" data-i18n="no_pc_files">No files on PC</div>
+
+      </div>
+
+
+
+      <button class="btn-primary" id="downloadBtn" disabled style="margin-top: 6px;">
+
+        <svg viewBox="0 0 24 24">
+
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+
+          <polyline points="7 10 12 15 17 10"/>
+
+          <line x1="12" y1="15" x2="12" y2="3"/>
+
+        </svg>
+
+        <span id="downloadBtnText" data-i18n="btn_download_selected">Download selected</span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+
+  <div id="tab-settings" class="tab-page">
+
+    <div class="card">
+
+
+
+      <div class="settings-group">
+
+        <div class="settings-label" data-i18n="lang_title">Interface Language</div>
+
+        <div class="segmented-control" id="langSelector">
+
+          <button class="segment-btn" data-lang="system" data-i18n="lang_system">System</button>
+
+          <button class="segment-btn" data-lang="ru">Russian</button>
+
+          <button class="segment-btn" data-lang="en">English</button>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="settings-group" style="margin-top: 22px;">
+
+        <div class="settings-label" data-i18n="theme_title">Appearance Theme</div>
+
+        <div class="segmented-control" id="themeModeSelector">
+
+          <button class="segment-btn" data-theme="dark" data-i18n="theme_dark">Dark</button>
+
+          <button class="segment-btn" data-theme="light" data-i18n="theme_light">Light</button>
+
+          <button class="segment-btn" data-theme="system" data-i18n="theme_system">System</button>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="settings-group" style="margin-top: 22px;">
+
+        <div class="settings-label" data-i18n="presets_title">Color Themes</div>
+
+        <div class="preset-grid" id="presetGrid"></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+
+</div>
+
+
+
+<nav class="bottom-nav">
+
+  <button class="nav-item" data-tab="history">
+
+    <svg viewBox="0 0 24 24">
+
+      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+
+      <path d="M3 3v5h5"/>
+
+      <path d="M12 7v5l4 2"/>
+
+    </svg>
+
+    <span data-i18n="nav_history">History</span>
+
+  </button>
+
+  <button class="nav-item active" data-tab="home">
+
+    <svg viewBox="0 0 24 24">
+
+      <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
+
+      <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+
+    </svg>
+
+    <span data-i18n="nav_home">Home</span>
+
+  </button>
+
+  <button class="nav-item" data-tab="settings">
+
+    <svg viewBox="0 0 24 24">
+
+      <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/>
+
+      <circle cx="12" cy="12" r="3"/>
+
+    </svg>
+
+    <span data-i18n="nav_settings">Settings</span>
+
+  </button>
+
+</nav>
+
+</div>
+
+
+
+<script>
+
+
+
+const I18N = {
+
+  ru: {
+
+    status_online: 'Подключено',
+
+    nav_history: 'История',
+
+    nav_home: 'Главная',
+
+    nav_settings: 'Настройки',
+
+    home_title: 'Загрузка на компьютер',
+
+    home_desc: 'Выберите файлы на телефоне для мгновенной передачи на ПК',
+
+    drop_title: 'Выбрать файлы',
+
+    drop_hint: 'Фото, видео, документы до 2 ГБ',
+
+    btn_cancel: 'Сбросить',
+
+    btn_clear: 'Очистить',
+
+    btn_send: 'Отправить на ПК',
+
+    uploading: 'Отправка...',
+
+    done: 'Готово!',
+
+    select_all: 'Выбрать все',
+
+    btn_download_selected: 'Скачать выбранные',
+
+    downloading_progress: (k, n) => 'Скачано ' + k + ' из ' + n,
+
+    selected_count_badge: (n) => 'Выбрано ' + n,
+
+    selected_count_format: (n) => 'Выбрано ' + (n === 1 ? '1 файл' : (n >= 2 && n <= 4 ? n + ' файла' : n + ' файлов')),
+
+    sent_success_toast: (n) => 'Успешно отправлено: ' + (n === 1 ? '1 файл' : (n >= 2 && n <= 4 ? n + ' файла' : n + ' файлов')),
+
+    history_title: 'История передач',
+
+    history_desc: 'Список файлов, отправленных с этого устройства',
+
+    history_empty: 'История пуста',
+
+    history_empty_desc: 'Здесь появятся файлы, отправленные на ваш компьютер',
+
+    history_clear: 'Очистить',
+
+    history_cleared_toast: 'История передач очищена',
+
+    lang_title: 'Язык интерфейса',
+
+    lang_desc: 'Выберите язык отображения веб-интерфейса',
+
+    lang_system: 'Системный',
+
+    theme_title: 'Тема оформления',
+
+    theme_desc: 'Цветовая схема приложения',
+
+    theme_dark: 'Тёмная',
+
+    theme_light: 'Светлая',
+
+    theme_system: 'Системная',
+
+    presets_title: 'Цветовые темы',
+
+    presets_desc: 'Выберите акцентную палитру в стиле EdgeDrop',
+
+    download_card_title: 'Получить с ПК',
+
+    btn_download: 'Скачать',
+
+    no_pc_files: 'Нет файлов на ПК',
+
+    offer_title: 'Файл с компьютера',
+
+    offer_question: 'Скачать этот файл на телефон?',
+
+    btn_dismiss: 'Отмена',
+
+    toast_theme_updated: 'Тема оформления обновлена',
+
+    toast_lang_updated: 'Язык интерфейса обновлён',
+
+    error_empty_selection: 'Файлы не выбраны',
+
+    error_network: 'Ошибка сети. Проверьте подключение к ПК.',
+
+    error_upload: 'Ошибка при загрузке файлов'
+
+  },
+
+  en: {
+
+    status_online: 'Connected',
+
+    nav_history: 'History',
+
+    nav_home: 'Home',
+
+    nav_settings: 'Settings',
+
+    home_title: 'Upload to Computer',
+
+    home_desc: 'Select files on your phone for instant transfer to PC',
+
+    drop_title: 'Select files',
+
+    drop_hint: 'Photos, videos, documents up to 2 GB',
+
+    btn_cancel: 'Reset',
+
+    btn_clear: 'Clear',
+
+    btn_send: 'Send to PC',
+
+    uploading: 'Uploading...',
+
+    done: 'Done!',
+
+    select_all: 'Select all',
+
+    btn_download_selected: 'Download selected',
+
+    downloading_progress: (k, n) => 'Downloaded ' + k + ' of ' + n,
+
+    selected_count_badge: (n) => 'Selected ' + n,
+
+    selected_count_format: (n) => 'Selected ' + n + (n === 1 ? ' file' : ' files'),
+
+    sent_success_toast: (n) => 'Successfully sent: ' + n + (n === 1 ? ' file' : ' files'),
+
+    history_title: 'Transfer History',
+
+    history_desc: 'List of files sent from this device',
+
+    history_empty: 'History is empty',
+
+    history_empty_desc: 'Transferred files will appear here',
+
+    history_clear: 'Clear',
+
+    history_cleared_toast: 'Transfer history cleared',
+
+    lang_title: 'Interface Language',
+
+    lang_desc: 'Select display language for web interface',
+
+    lang_system: 'System',
+
+    theme_title: 'Appearance Theme',
+
+    theme_desc: 'Application color scheme',
+
+    theme_dark: 'Dark',
+
+    theme_light: 'Light',
+
+    theme_system: 'System',
+
+    presets_title: 'Color Themes',
+
+    presets_desc: 'Select accent palette in EdgeDrop style',
+
+    download_card_title: 'Download from PC',
+
+    btn_download: 'Download',
+
+    no_pc_files: 'No files on PC',
+
+    offer_title: 'File from Computer',
+
+    offer_question: 'Download this file to phone?',
+
+    btn_dismiss: 'Dismiss',
+
+    toast_theme_updated: 'Appearance theme updated',
+
+    toast_lang_updated: 'Interface language updated',
+
+    error_empty_selection: 'No files selected',
+
+    error_network: 'Network error. Check connection to PC.',
+
+    error_upload: 'Upload error'
+
+  }
+
+};
+
+
+
+const PRESETS = [
+
+  { id: 'dark_blue', bg: '#202020', accent: '#0078D4' },
+
+  { id: 'light_blue', bg: '#F3F3F3', accent: '#0067B8' },
+
+  { id: 'cyberpunk', bg: '#141A16', accent: '#10893E' },
+
+  { id: 'amethyst', bg: '#1A1524', accent: '#881798' },
+
+  { id: 'sunset', bg: '#1A1722', accent: '#E05D06' },
+
+  { id: 'ruby', bg: '#1D1516', accent: '#E81123' },
+
+  { id: 'sakura', bg: '#1F151C', accent: '#E3008C' },
+
+  { id: 'ocean', bg: '#121A1F', accent: '#008272' },
+
+  { id: 'amber', bg: '#1D1814', accent: '#FF8C00' },
+
+  { id: 'indigo', bg: '#141524', accent: '#4F46E5' },
+
+  { id: 'oled_black', bg: '#0C0C0C', accent: '#0078D4' },
+
+  { id: 'paper_white', bg: '#FFFFFF', accent: '#10893E' }
+
+];
+
+
+
+let currentLang = 'ru';
+
+let configuredLang = 'system';
+
+let themeMode = 'dark';
+
+let activePresetId = 'dark_blue';
+
+let selectedFiles = [];
+
+
+
+const toastContainer = document.getElementById('toastContainer');
+
+function showToast(message, type = 'success') {
+
+  const toast = document.createElement('div');
+
+  toast.className = 'toast toast-' + type;
+
+
+
+  let iconSvg = '';
+
+  if (type === 'success') {
+
+    iconSvg = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  } else if (type === 'error') {
+
+    iconSvg = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+  } else {
+
+    iconSvg = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+
+  }
+
+
+
+  toast.innerHTML = `
+
+    <div class="toast-icon">${iconSvg}</div>
+
+    <div class="toast-text">${message}</div>
+
+    <button class="toast-close">
+
+      <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+
+    </button>
+
+  `;
+
+
+
+  const closeBtn = toast.querySelector('.toast-close');
+
+  const dismiss = () => {
+
+    toast.classList.remove('show');
+
+    setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 250);
+
+  };
+
+  closeBtn.addEventListener('click', dismiss);
+
+
+
+  toastContainer.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add('show'));
+
+  setTimeout(dismiss, 3500);
+
+}
+
+
+
+function formatBytes(bytes) {
+
+  if (bytes === 0) return '0 B';
+
+  const k = 1024;
+
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+
+}
+
+
+
+function hexToRgb(hex) {
+
+  const clean = hex.replace('#', '');
+
+  const num = parseInt(clean, 16);
+
+  return {
+
+    r: (num >> 16) & 255,
+
+    g: (num >> 8) & 255,
+
+    b: num & 255
+
+  };
+
+}
+
+
+
+function isLightColor(hex) {
+
+  const { r, g, b } = hexToRgb(hex);
+
+  return ((0.299 * r + 0.587 * g + 0.114 * b) / 255) > 0.5;
+
+}
+
+
+
+function applyTheme(bgHex, accentHex) {
+
+  const root = document.documentElement;
+
+  const isLight = isLightColor(bgHex);
+
+
+
+  root.style.setProperty('--bg', bgHex);
+
+  root.style.setProperty('--accent', accentHex);
+
+
+
+  const cleanHex = bgHex.toUpperCase();
+
+  const isSidebarMatch = (cleanHex === '#202020' || cleanHex === '#F3F3F3' || cleanHex === '#FFFFFF');
+
+
+
+  if (isLight) {
+
+    const navColor = cleanHex === '#FFFFFF' ? '#F2F2F2' : '#E6E6E6';
+
+    root.style.setProperty('--card', '#FFFFFF');
+
+    root.style.setProperty('--card-stroke', 'transparent');
+
+    root.style.setProperty('--nav', navColor);
+
+    root.style.setProperty('--btn', isSidebarMatch ? navColor : '#E4E9EE');
+
+    root.style.setProperty('--btn-hover', isSidebarMatch ? '#D8D8D8' : '#D5DFE8');
+
+    root.style.setProperty('--text', '#1A1A1A');
+
+    root.style.setProperty('--subtext', '#5F5F5F');
+
+    root.style.setProperty('--border', 'transparent');
+
+    root.style.setProperty('--success', '#2E7D32');
+
+    root.style.setProperty('--error', '#D32F2F');
+
+  } else {
+
+
+
+    const { r, g, b } = hexToRgb(bgHex);
+
+    const cardR = Math.min(255, r + 11);
+
+    const cardG = Math.min(255, g + 11);
+
+    const cardB = Math.min(255, b + 11);
+
+    const cardHex = '#' + ((1 << 24) + (cardR << 16) + (cardG << 8) + cardB).toString(16).slice(1);
+
+
+
+    const navHex = isSidebarMatch ? '#181818' : cardHex;
+
+    const btnHex = isSidebarMatch ? '#181818' : ('#' + ((1 << 24) + (Math.min(255, r + 6) << 16) + (Math.min(255, g + 10) << 8) + Math.min(255, b + 14)).toString(16).slice(1));
+
+    const btnHover = isSidebarMatch ? '#222222' : '#262F37';
+
+
+
+    root.style.setProperty('--card', cardHex);
+
+    root.style.setProperty('--card-stroke', 'transparent');
+
+    root.style.setProperty('--nav', navHex);
+
+    root.style.setProperty('--btn', btnHex);
+
+    root.style.setProperty('--btn-hover', btnHover);
+
+    root.style.setProperty('--text', '#F3F3F3');
+
+    root.style.setProperty('--subtext', '#9E9E9E');
+
+    root.style.setProperty('--border', 'transparent');
+
+    root.style.setProperty('--success', '#54B054');
+
+    root.style.setProperty('--error', '#FF5252');
+
+  }
+
+
+
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+
+  if (metaTheme) metaTheme.setAttribute('content', bgHex);
+
+}
+
+
+
+function updateTheme() {
+
+  if (themeMode === 'system') {
+
+    const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (sysDark) {
+
+      applyTheme('#202020', '#0078D4');
+
+      activePresetId = 'dark_blue';
+
+    } else {
+
+      applyTheme('#F3F3F3', '#0067B8');
+
+      activePresetId = 'light_blue';
+
+    }
+
+  } else if (themeMode === 'light') {
+
+    applyTheme('#F3F3F3', '#0067B8');
+
+    activePresetId = 'light_blue';
+
+  } else if (themeMode === 'dark') {
+
+    applyTheme('#202020', '#0078D4');
+
+    activePresetId = 'dark_blue';
+
+  } else if (themeMode === 'custom') {
+
+    const preset = PRESETS.find(p => p.id === activePresetId) || PRESETS[0];
+
+    applyTheme(preset.bg, preset.accent);
+
+  }
+
+
+
+  document.querySelectorAll('#themeModeSelector .segment-btn').forEach(btn => {
+
+    btn.classList.toggle('active', btn.dataset.theme === themeMode);
+
+  });
+
+
+
+  document.querySelectorAll('.preset-item').forEach(item => {
+
+    item.classList.toggle('active', item.dataset.id === activePresetId);
+
+  });
+
+}
+
+
+
+function renderPresetGrid() {
+
+  const grid = document.getElementById('presetGrid');
+
+  grid.innerHTML = '';
+
+  PRESETS.forEach(p => {
+
+    const item = document.createElement('div');
+
+    item.className = 'preset-item' + (p.id === activePresetId ? ' active' : '');
+
+    item.dataset.id = p.id;
+
+    item.style.backgroundColor = p.bg;
+
+    item.innerHTML = `
+
+      <div class="preset-accent-badge" style="background-color: ${p.accent};"></div>
+
+      <svg class="preset-check" viewBox="0 0 24 24">
+
+        <circle cx="12" cy="12" r="10" fill="${p.accent}"/>
+
+        <polyline points="16 9 10 15 8 13" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+
+      </svg>
+
+    `;
+
+    item.addEventListener('click', () => {
+
+      activePresetId = p.id;
+
+      themeMode = 'custom';
+
+      applyTheme(p.bg, p.accent);
+
+      localStorage.setItem('edgedrop_theme_mode', themeMode);
+
+      localStorage.setItem('edgedrop_preset_id', activePresetId);
+
+      updateTheme();
+
+    });
+
+    grid.appendChild(item);
+
+  });
+
+}
+
+
+
+function resolveEffectiveLanguage() {
+
+  if (configuredLang === 'system') {
+
+    const navLang = (navigator.language || navigator.userLanguage || 'ru').toLowerCase();
+
+    currentLang = (navLang.startsWith('ru') || navLang.startsWith('be') || navLang.startsWith('kk') || navLang.startsWith('uk')) ? 'ru' : 'en';
+
+  } else {
+
+    currentLang = configuredLang;
+
+  }
+
+}
+
+
+
+function applyLanguage() {
+
+  resolveEffectiveLanguage();
+
+  const dict = I18N[currentLang] || I18N.ru;
+
+
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+
+    const key = el.dataset.i18n;
+
+    if (dict[key]) {
+
+      el.textContent = dict[key];
+
+    }
+
+  });
+
+
+
+  const statusEl = document.getElementById('statusLabel');
+
+  if (statusEl) statusEl.textContent = dict.status_online;
+
+
+
+  document.querySelectorAll('#langSelector .segment-btn').forEach(btn => {
+
+    btn.classList.toggle('active', btn.dataset.lang === configuredLang);
+
+  });
+
+
+
+  updateSelectedView();
+
+  renderPcFilesList();
+
+}
+
+
+
+const tabButtons = document.querySelectorAll('.bottom-nav .nav-item');
+
+const tabPages = {
+
+  history: document.getElementById('tab-history'),
+
+  home: document.getElementById('tab-home'),
+
+  settings: document.getElementById('tab-settings')
+
+};
+
+
+
+tabButtons.forEach(btn => {
+
+  btn.addEventListener('click', () => {
+
+    const target = btn.dataset.tab;
+
+    tabButtons.forEach(b => b.classList.toggle('active', b === btn));
+
+    Object.keys(tabPages).forEach(k => {
+
+      tabPages[k].classList.toggle('active', k === target);
+
+    });
+
+    if (target === 'history') {
+
+      renderHistory();
+
+    }
+
+    if (target === 'home') {
+
+      fetchPcFiles(true);
+
+    }
+
+  });
+
+});
+
+
+
+const fileInput = document.getElementById('fileInput');
+
+const dropZone = document.getElementById('dropZone');
+
+const selectedInfo = document.getElementById('selectedInfo');
+
+const selectedCount = document.getElementById('selectedCount');
+
+const selectedSize = document.getElementById('selectedSize');
+
+const cancelSelectBtn = document.getElementById('cancelSelectBtn');
+
+const uploadBtn = document.getElementById('uploadBtn');
+
+const progressContainer = document.getElementById('progressContainer');
+
+const progressPercent = document.getElementById('progressPercent');
+
+const progressBar = document.getElementById('progressBar');
+
+const progressStatus = document.getElementById('progressStatus');
+
+
+
+dropZone.addEventListener('click', () => fileInput.click());
+
+
+
+fileInput.addEventListener('change', () => {
+
+  if (!fileInput.files || fileInput.files.length === 0) return;
+
+  selectedFiles = Array.from(fileInput.files);
+
+  updateSelectedView();
+
+});
+
+
+
+cancelSelectBtn.addEventListener('click', () => {
+
+  selectedFiles = [];
+
+  fileInput.value = '';
+
+  updateSelectedView();
+
+});
+
+
+
+function updateSelectedView() {
+
+  const dict = I18N[currentLang] || I18N.ru;
+
+  if (selectedFiles.length === 0) {
+
+    selectedInfo.style.display = 'none';
+
+    uploadBtn.disabled = true;
+
+    return;
+
+  }
+
+  let totalBytes = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+
+  selectedCount.textContent = dict.selected_count_format(selectedFiles.length);
+
+  selectedSize.textContent = formatBytes(totalBytes);
+
+  selectedInfo.style.display = 'flex';
+
+  uploadBtn.disabled = false;
+
+}
+
+
+
+uploadBtn.addEventListener('click', () => {
+
+  const dict = I18N[currentLang] || I18N.ru;
+
+  if (selectedFiles.length === 0) {
+
+    showToast(dict.error_empty_selection, 'error');
+
+    return;
+
+  }
+
+
+
+  uploadBtn.disabled = true;
+
+  dropZone.style.pointerEvents = 'none';
+
+  progressContainer.style.display = 'block';
+
+  progressBar.style.width = '0%';
+
+  progressPercent.textContent = '0%';
+
+  progressStatus.textContent = dict.uploading;
+
+
+
+  const formData = new FormData();
+
+  selectedFiles.forEach(file => {
+
+    formData.append('files', file);
+
+  });
+
+
+
+  const xhr = new XMLHttpRequest();
+
+  xhr.open('POST', '/upload', true);
+
+
+
+  xhr.upload.onprogress = (e) => {
+
+    if (e.lengthComputable) {
+
+      const percent = Math.round((e.loaded / e.total) * 100);
+
+      progressBar.style.width = percent + '%';
+
+      progressPercent.textContent = percent + '%';
+
+      progressStatus.textContent = formatBytes(e.loaded) + ' / ' + formatBytes(e.total);
+
+    }
+
+  };
+
+
+
+  xhr.onload = () => {
+
+    dropZone.style.pointerEvents = 'auto';
+
+    if (xhr.status === 200) {
+
+      let resp;
+
+      try { resp = JSON.parse(xhr.responseText); } catch(e) {}
+
+      const received = (resp && resp.received) ? resp.received : selectedFiles.map(f => f.name);
+
+
+
+      progressBar.style.width = '100%';
+
+      progressPercent.textContent = '100%';
+
+      progressStatus.textContent = dict.done;
+
+
+
+      showToast(dict.sent_success_toast(received.length), 'success');
+
+
+
+      const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      selectedFiles.forEach((file, idx) => {
+
+        saveHistoryItem({
+
+          name: received[idx] || file.name,
+
+          size: formatBytes(file.size),
+
+          time: nowStr,
+
+          timestamp: Date.now()
+
+        });
+
+      });
+
+
+
+      setTimeout(() => {
+
+        selectedFiles = [];
+
+        fileInput.value = '';
+
+        updateSelectedView();
+
+        progressContainer.style.display = 'none';
+
+        fetchPcFiles(true);
+
+      }, 900);
+
+    } else {
+
+      let resp;
+
+      try { resp = JSON.parse(xhr.responseText); } catch(e) {}
+
+      let errMsg = (resp && resp.error) ? resp.error : (dict.error_upload + ' (' + xhr.status + ')');
+
+      showToast(errMsg, 'error');
+
+      uploadBtn.disabled = false;
+
+      progressContainer.style.display = 'none';
+
+    }
+
+  };
+
+
+
+  xhr.onerror = () => {
+
+    dropZone.style.pointerEvents = 'auto';
+
+    uploadBtn.disabled = false;
+
+    showToast(dict.error_network, 'error');
+
+    progressStatus.textContent = 'Error';
+
+  };
+
+
+
+  xhr.send(formData);
+
+});
+
+
+
+let pcFiles = [];
+
+let selectedPcFiles = new Set();
+
+let isDownloadingPcFiles = false;
+
+let currentOffer = null;
+
+
+
+const pcFileList = document.getElementById('pcFileList');
+
+const pcFilesEmpty = document.getElementById('pcFilesEmpty');
+
+const pcFilesToolbar = document.getElementById('pcFilesToolbar');
+
+const selectAllPcFiles = document.getElementById('selectAllPcFiles');
+
+const selectedPcCountBadge = document.getElementById('selectedPcCountBadge');
+
+const downloadBtn = document.getElementById('downloadBtn');
+
+const downloadBtnText = document.getElementById('downloadBtnText');
+
+const refreshDownloadBtn = document.getElementById('refreshDownloadBtn');
+
+
+
+const fileOfferModal = document.getElementById('fileOfferModal');
+
+const offerFileName = document.getElementById('offerFileName');
+
+const offerFileSize = document.getElementById('offerFileSize');
+
+const offerDownloadBtn = document.getElementById('offerDownloadBtn');
+
+const offerDismissBtn = document.getElementById('offerDismissBtn');
+
+
+
+async function fetchPcFiles(silent = false) {
+
+  try {
+
+    const res = await fetch('/files', { cache: 'no-store' });
+
+    if (res.status === 401) {
+
+      document.getElementById('app').style.display = 'none';
+
+      document.getElementById('auth').style.display = 'flex';
+
+      return;
+
+    }
+
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+
+    pcFiles = await res.json();
+
+    renderPcFilesList();
+
+  } catch (err) {
+
+    if (!silent) {
+
+      const dict = I18N[currentLang] || I18N.ru;
+
+      showToast(dict.error_network, 'error');
+
+    }
+
+  }
+
+}
+
+
+
+function updatePcToolbar() {
+
+  const dict = I18N[currentLang] || I18N.ru;
+
+  if (selectAllPcFiles) {
+
+    selectAllPcFiles.checked = (pcFiles && pcFiles.length > 0 && selectedPcFiles.size === pcFiles.length);
+
+  }
+
+  if (selectedPcCountBadge) {
+
+    selectedPcCountBadge.textContent = dict.selected_count_badge(selectedPcFiles.size);
+
+  }
+
+  if (downloadBtn) {
+
+    downloadBtn.disabled = selectedPcFiles.size === 0 || isDownloadingPcFiles;
+
+  }
+
+  if (downloadBtnText && !isDownloadingPcFiles) {
+
+    downloadBtnText.textContent = dict.btn_download_selected;
+
+  }
+
+}
+
+
+
+if (selectAllPcFiles) {
+
+  selectAllPcFiles.addEventListener('change', () => {
+
+    if (!pcFiles || pcFiles.length === 0) return;
+
+    if (selectAllPcFiles.checked) {
+
+      pcFiles.forEach(f => selectedPcFiles.add(f.name));
+
+    } else {
+
+      selectedPcFiles.clear();
+
+    }
+
+    document.querySelectorAll('.pc-file-item').forEach(item => {
+
+      const name = item.getAttribute('data-name');
+
+      const cb = item.querySelector('.pc-file-cb');
+
+      const isSel = selectedPcFiles.has(name);
+
+      if (cb) cb.checked = isSel;
+
+      if (isSel) item.classList.add('selected'); else item.classList.remove('selected');
+
+    });
+
+    updatePcToolbar();
+
+  });
+
+}
+
+
+
+function renderPcFilesList() {
+
+  if (!pcFileList) return;
+
+  if (!pcFiles || pcFiles.length === 0) {
+
+    selectedPcFiles.clear();
+
+    pcFileList.innerHTML = '';
+
+    pcFileList.style.display = 'none';
+
+    if (pcFilesToolbar) pcFilesToolbar.style.display = 'none';
+
+    if (pcFilesEmpty) pcFilesEmpty.style.display = 'flex';
+
+    if (downloadBtn) downloadBtn.disabled = true;
+
+    return;
+
+  }
+
+
+
+  if (pcFilesEmpty) pcFilesEmpty.style.display = 'none';
+
+  if (pcFilesToolbar) pcFilesToolbar.style.display = 'flex';
+
+  pcFileList.style.display = 'flex';
+
+  pcFileList.innerHTML = '';
+
+
+
+  const currentNames = new Set(pcFiles.map(f => f.name));
+
+  selectedPcFiles = new Set([...selectedPcFiles].filter(x => currentNames.has(x)));
+
+
+
+  pcFiles.forEach(f => {
+
+    const isSelected = selectedPcFiles.has(f.name);
+
+    const item = document.createElement('div');
+
+    item.className = 'pc-file-item' + (isSelected ? ' selected' : '');
+
+    item.setAttribute('data-name', f.name);
+
+
+
+    let dateText = '';
+
+    if (f.modified) {
+
+      try {
+
+        const d = new Date(f.modified);
+
+        dateText = ' • ' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      } catch(e) {}
+
+    }
+
+
+
+    item.innerHTML = `
+
+      <input type="checkbox" class="pc-file-cb" ${isSelected ? 'checked' : ''}>
+
+      <svg class="pc-file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+
+        <polyline points="14 2 14 8 20 8"></polyline>
+
+      </svg>
+
+      <div class="pc-file-details">
+
+        <div class="pc-file-name">${f.name}</div>
+
+        <div class="pc-file-meta">${formatBytes(f.size)}${dateText}</div>
+
+      </div>
+
+    `;
+
+
+
+    const cb = item.querySelector('.pc-file-cb');
+
+
+
+    item.addEventListener('click', (e) => {
+
+      if (e.target !== cb) {
+
+        cb.checked = !cb.checked;
+
+      }
+
+      if (cb.checked) {
+
+        selectedPcFiles.add(f.name);
+
+        item.classList.add('selected');
+
+      } else {
+
+        selectedPcFiles.delete(f.name);
+
+        item.classList.remove('selected');
+
+      }
+
+      updatePcToolbar();
+
+    });
+
+
+
+    pcFileList.appendChild(item);
+
+  });
+
+
+
+  updatePcToolbar();
+
+}
+
+
+
+function downloadFile(name) {
+
+  if (!name) return;
+
+  const url = '/download/' + encodeURIComponent(name);
+
+  const a = document.createElement('a');
+
+  a.href = url;
+
+  a.download = name;
+
+  document.body.appendChild(a);
+
+  a.click();
+
+  document.body.removeChild(a);
+
+}
+
+
+
+if (downloadBtn) {
+
+  downloadBtn.addEventListener('click', async () => {
+
+    if (selectedPcFiles.size === 0 || isDownloadingPcFiles) return;
+
+    isDownloadingPcFiles = true;
+
+    downloadBtn.disabled = true;
+
+    if (selectAllPcFiles) selectAllPcFiles.disabled = true;
+
+
+
+    const dict = I18N[currentLang] || I18N.ru;
+
+    const filesToDownload = pcFiles.filter(f => selectedPcFiles.has(f.name));
+
+    const total = filesToDownload.length;
+
+
+
+    for (let i = 0; i < total; i++) {
+
+      if (downloadBtnText) {
+
+        downloadBtnText.textContent = dict.downloading_progress(i, total);
+
+      }
+
+      downloadFile(filesToDownload[i].name);
+
+      await new Promise(r => setTimeout(r, 300));
+
+    }
+
+
+
+    if (downloadBtnText) {
+
+      downloadBtnText.textContent = dict.downloading_progress(total, total);
+
+    }
+
+    showToast(dict.downloading_progress(total, total), 'success');
+
+
+
+    setTimeout(() => {
+
+      isDownloadingPcFiles = false;
+
+      if (selectAllPcFiles) selectAllPcFiles.disabled = false;
+
+      updatePcToolbar();
+
+    }, 1200);
+
+  });
+
+}
+
+
+
+if (refreshDownloadBtn) {
+
+  refreshDownloadBtn.addEventListener('click', () => {
+
+    fetchPcFiles();
+
+  });
+
+}
+
+
+
+function onFileOfferReceived(offer) {
+
+  if (!offer || (currentOffer && currentOffer.id === offer.id)) return;
+
+  currentOffer = offer;
+
+  if (offerFileName) offerFileName.textContent = offer.name;
+
+  if (offerFileSize) offerFileSize.textContent = formatBytes(offer.size);
+
+  if (fileOfferModal) fileOfferModal.style.display = 'flex';
+
+
+
+  if (navigator.vibrate) {
+
+    try { navigator.vibrate([150, 80, 150]); } catch(e) {}
+
+  }
+
+}
+
+
+
+function dismissCurrentOffer() {
+
+  if (currentOffer) {
+
+    try {
+
+      fetch('/dismiss-offer/' + encodeURIComponent(currentOffer.id), { method: 'POST' });
+
+    } catch(e) {}
+
+    currentOffer = null;
+
+  }
+
+  if (fileOfferModal) fileOfferModal.style.display = 'none';
+
+  fetchPcFiles(true);
+
+}
+
+
+
+if (offerDownloadBtn) {
+
+  offerDownloadBtn.addEventListener('click', () => {
+
+    if (currentOffer) {
+
+      downloadFile(currentOffer.name);
+
+    }
+
+    dismissCurrentOffer();
+
+  });
+
+}
+
+
+
+if (offerDismissBtn) {
+
+  offerDismissBtn.addEventListener('click', () => {
+
+    dismissCurrentOffer();
+
+  });
+
+}
+
+
+
+async function checkPendingOffer() {
+
+  try {
+
+    const res = await fetch('/latest-offer', { cache: 'no-store' });
+
+    if (res.ok) {
+
+      const offer = await res.json();
+
+      if (offer && offer.id) {
+
+        onFileOfferReceived(offer);
+
+      }
+
+    }
+
+  } catch(e) {}
+
+}
+
+
+
+const clientSid = 's_' + Math.random().toString(36).substring(2, 10);
+
+function initSse() {
+
+  if (!!window.EventSource) {
+
+    try {
+
+      const sse = new EventSource('/events?sid=' + clientSid);
+
+      sse.onmessage = (e) => {
+
+        try {
+
+          const payload = JSON.parse(e.data);
+
+          if (payload && payload.type === 'file-offer') {
+
+            onFileOfferReceived(payload.file);
+
+          }
+
+        } catch(err) {}
+
+      };
+
+    } catch(e) {}
+
+  }
+
+  setInterval(checkPendingOffer, 2500);
+
+
+
+  window.addEventListener('beforeunload', () => {
+
+    try {
+
+      if (navigator.sendBeacon) {
+
+        navigator.sendBeacon('/session-end?sid=' + clientSid);
+
+      }
+
+    } catch(e) {}
+
+  });
+
+  window.addEventListener('pagehide', () => {
+
+    try {
+
+      if (navigator.sendBeacon) {
+
+        navigator.sendBeacon('/session-end?sid=' + clientSid);
+
+      }
+
+    } catch(e) {}
+
+  });
+
+}
+
+
+
+const STORAGE_KEY_HISTORY = 'edgedrop_history_v1';
+
+function getHistory() {
+
+  try {
+
+    const raw = localStorage.getItem(STORAGE_KEY_HISTORY);
+
+    return raw ? JSON.parse(raw) : [];
+
+  } catch(e) { return []; }
+
+}
+
+
+
+function saveHistoryItem(item) {
+
+  try {
+
+    const list = getHistory();
+
+    list.unshift(item);
+
+    if (list.length > 80) list.pop();
+
+    localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(list));
+
+  } catch(e) {}
+
+}
+
+
+
+function clearHistory() {
+
+  localStorage.removeItem(STORAGE_KEY_HISTORY);
+
+  renderHistory();
+
+}
+
+
+
+document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
+
+
+
+function renderHistory() {
+
+  const list = getHistory();
+
+  const emptyEl = document.getElementById('historyEmpty');
+
+  const listEl = document.getElementById('historyList');
+
+
+
+  if (list.length === 0) {
+
+    emptyEl.style.display = 'flex';
+
+    listEl.style.display = 'none';
+
+    listEl.innerHTML = '';
+
+  } else {
+
+    emptyEl.style.display = 'none';
+
+    listEl.style.display = 'flex';
+
+    listEl.innerHTML = '';
+
+    list.forEach(item => {
+
+      const el = document.createElement('div');
+
+      el.className = 'file-item';
+
+      el.innerHTML = `
+
+        <div class="file-check">
+
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+
+        </div>
+
+        <div class="file-info">
+
+          <div class="file-name">${item.name}</div>
+
+          <div class="file-meta">${item.size} • ${item.time}</div>
+
+        </div>
+
+      `;
+
+      listEl.appendChild(el);
+
+    });
+
+  }
+
+}
+
+
+
+document.querySelectorAll('#langSelector .segment-btn').forEach(btn => {
+
+  btn.addEventListener('click', () => {
+
+    configuredLang = btn.dataset.lang;
+
+    localStorage.setItem('edgedrop_lang', configuredLang);
+
+    applyLanguage();
+
+  });
+
+});
+
+
+
+document.querySelectorAll('#themeModeSelector .segment-btn').forEach(btn => {
+
+  btn.addEventListener('click', () => {
+
+    themeMode = btn.dataset.theme;
+
+    localStorage.setItem('edgedrop_theme_mode', themeMode);
+
+    updateTheme();
+
+  });
+
+});
+
+
+
+try {
+
+  configuredLang = localStorage.getItem('edgedrop_lang') || 'system';
+
+  themeMode = localStorage.getItem('edgedrop_theme_mode') || 'dark';
+
+  activePresetId = localStorage.getItem('edgedrop_preset_id') || 'dark_blue';
+
+} catch(e) {}
+
+
+
+renderPresetGrid();
+
+updateTheme();
+
+applyLanguage();
+
+
+
+const pinCells = Array.from(document.querySelectorAll('.pin-cell'));
+
+
+
+function getPinValue() {
+
+  return pinCells.map(c => c.value).join('');
+
+}
+
+
+
+function clearPin() {
+
+  pinCells.forEach(c => {
+
+    c.value = '';
+
+    c.classList.remove('filled');
+
+  });
+
+  if (pinCells[0]) pinCells[0].focus();
+
+}
+
+
+
+pinCells.forEach((cell, idx) => {
+
+  cell.addEventListener('input', (e) => {
+
+    const raw = cell.value.replace(/\D/g, '');
+
+    cell.value = raw ? raw[raw.length - 1] : '';
+
+    cell.classList.toggle('filled', !!cell.value);
+
+
+
+    if (cell.value) {
+
+      if (idx < pinCells.length - 1) {
+
+        pinCells[idx + 1].focus();
+
+        pinCells[idx + 1].select();
+
+      } else {
+
+        cell.blur();
+
+        tryLogin();
+
+      }
+
+    }
+
+  });
+
+
+
+  cell.addEventListener('keydown', (e) => {
+
+    if (e.key === 'Backspace') {
+
+      if (!cell.value && idx > 0) {
+
+        pinCells[idx - 1].focus();
+
+        pinCells[idx - 1].value = '';
+
+        pinCells[idx - 1].classList.remove('filled');
+
+        e.preventDefault();
+
+      } else {
+
+        cell.classList.remove('filled');
+
+      }
+
+    } else if (e.key === 'ArrowLeft' && idx > 0) {
+
+      pinCells[idx - 1].focus();
+
+      e.preventDefault();
+
+    } else if (e.key === 'ArrowRight' && idx < pinCells.length - 1) {
+
+      pinCells[idx + 1].focus();
+
+      e.preventDefault();
+
+    } else if (e.key === 'Enter') {
+
+      e.preventDefault();
+
+      tryLogin();
+
+    }
+
+  });
+
+
+
+  cell.addEventListener('paste', (e) => {
+
+    e.preventDefault();
+
+    const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+
+    if (!paste) return;
+
+    for (let i = 0; i < pinCells.length; i++) {
+
+      pinCells[i].value = paste[i] || '';
+
+      pinCells[i].classList.toggle('filled', !!pinCells[i].value);
+
+    }
+
+    const nextIdx = Math.min(paste.length, pinCells.length - 1);
+
+    pinCells[nextIdx].focus();
+
+    if (paste.length >= 4) {
+
+      tryLogin();
+
+    }
+
+  });
+
+});
+
+
+
+async function tryLogin() {
+
+  const authError = document.getElementById('authError');
+
+  const loginBtn = document.getElementById('loginBtn');
+
+  const pin = getPinValue();
+
+  if (pin.length !== 4) {
+
+    if (authError) {
+
+      authError.textContent = 'Enter 4 digits';
+
+      authError.style.display = 'block';
+
+    }
+
+    const emptyIdx = pinCells.findIndex(c => !c.value);
+
+    if (emptyIdx >= 0) pinCells[emptyIdx].focus();
+
+    return;
+
+  }
+
+
+
+  if (loginBtn) loginBtn.disabled = true;
+
+  if (authError) authError.style.display = 'none';
+
+
+
+  try {
+
+    const resp = await fetch('/auth', {
+
+      method: 'POST',
+
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+
+      body: 'pin=' + encodeURIComponent(pin)
+
+    });
+
+
+
+    if (resp.ok) {
+
+      document.getElementById('auth').style.display = 'none';
+
+      document.getElementById('app').style.display = 'block';
+
+      renderHistory();
+
+      fetchPcFiles(true);
+
+      initSse();
+
+    } else {
+
+      if (authError) {
+
+        authError.textContent = 'Invalid PIN code';
+
+        authError.style.display = 'block';
+
+      }
+
+      clearPin();
+
+    }
+
+  } catch (err) {
+
+    if (authError) {
+
+      authError.textContent = 'Network error';
+
+      authError.style.display = 'block';
+
+    }
+
+  } finally {
+
+    if (loginBtn) loginBtn.disabled = false;
+
+  }
+
+}
+
+
+
+fetch('/auth-check')
+
+  .then(r => {
+
+    if (r.ok) {
+
+      document.getElementById('auth').style.display = 'none';
+
+      document.getElementById('app').style.display = 'block';
+
+      renderHistory();
+
+      fetchPcFiles(true);
+
+      initSse();
+
+    } else {
+
+      document.getElementById('auth').style.display = 'flex';
+
+      document.getElementById('app').style.display = 'none';
+
+      setTimeout(() => { if (pinCells[0]) pinCells[0].focus(); }, 150);
+
+    }
+
+  })
+
+  .catch(() => {
+
+    document.getElementById('auth').style.display = 'flex';
+
+    document.getElementById('app').style.display = 'none';
+
+    setTimeout(() => { if (pinCells[0]) pinCells[0].focus(); }, 150);
+
+  });
+
+</script>
+
+</body>
+
+</html>
+
