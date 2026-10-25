@@ -13,8 +13,11 @@
 [Oo]bj/
 publish/
 installer_output/
+release/
+dist/
 *.tmp
 *.log
+*.zip
 
 ## User Data & Runtime State
 *.edpart

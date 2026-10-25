@@ -38,7 +38,9 @@ The application supports:
 - **Transfer Monitoring**: Live display of current speed, transferred bytes, percentage, and ETA on both sender and receiver.
 - **Transfer History**: Persistent log of transfers with filtering by status, peer, and direction.
 - **System Tray**: Minimization to Windows notification area with background operation and toast notifications.
-- **Localization**: English and Russian UI support.
+- **Localization**: English and Russian languages with automatic system detection.
+- **Appearance & Themes**: Dark/Light and customizable color palettes with smooth Fluent-style animations.
+- **Security & Safe Mode**: Batch-level approvals and safe mode execution prevention.
 - **Local Operation**: Operates strictly within local subnet; no telemetry or data collection.
 
 ---
@@ -46,7 +48,7 @@ The application supports:
 ## Installation
 
 ### Installer
-1. Download `EdgeDrop_Setup_v1.0.0.exe` from [Releases](https://github.com/LegoManchik/EdgeDrop/releases).
+1. Download `EdgeDrop_v1.0.0.exe` from [Releases](https://github.com/LegoManchik/EdgeDrop/releases).
 2. Run the setup wizard.
 3. Configurable options:
    - Desktop shortcut creation.
@@ -54,7 +56,7 @@ The application supports:
    - Windows Explorer context menu registration.
 
 ### Portable
-1. Download `EdgeDrop-v1.0.0-portable.zip` from [Releases](https://github.com/LegoManchik/EdgeDrop/releases).
+1. Download `EdgeDrop_v1.0.0_Portable.zip` from [Releases](https://github.com/LegoManchik/EdgeDrop/releases).
 2. Extract the archive.
 3. Run `EdgeDrop.exe`.
 
@@ -69,7 +71,7 @@ The application supports:
 
 ### PC to Mobile / Other OS
 1. Open EdgeDrop and open the Web Transfer section.
-2. Scan the QR code with the mobile device's camera or navigate to the displayed URL (e.g., `http://192.168.1.5:11000`) in any browser.
+2. Scan the QR code with the mobile device's camera or navigate to the displayed URL in any browser.
 3. Upload or download files using the web interface.
 
 ---

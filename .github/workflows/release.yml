@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 8 SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore EdgeDrop.sln
+
+    - name: Publish application (win-x64)
+      run: dotnet publish EdgeDrop/EdgeDrop.csproj -c Release -r win-x64 --self-contained false -o publish
+
+    - name: Clean PDB files
+      run: Remove-Item -Path "publish\*.pdb" -Force -ErrorAction SilentlyContinue
+      shell: pwsh
+
+    - name: Install Inno Setup
+      run: choco install innosetup -y
+
+    - name: Build Inno Setup Installer
+      run: iscc EdgeDrop_Setup.iss
+
+    - name: Create Portable Zip
+      run: Compress-Archive -Path "publish\*" -DestinationPath "release\EdgeDrop_v1.0.0_Portable.zip" -Force
+      shell: pwsh
+
+    - name: Generate Checksums
+      run: |
+        Get-FileHash -Path "release\EdgeDrop_v1.0.0.exe", "release\EdgeDrop_v1.0.0_Portable.zip" -Algorithm SHA256 |
+          ForEach-Object { "$($_.Hash)  $($_.Path | Split-Path -Leaf)" } |
+          Out-File -Encoding utf8 "release\SHA256SUMS.txt"
+      shell: pwsh
+
+    - name: Publish GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          release/EdgeDrop_v1.0.0.exe
+          release/EdgeDrop_v1.0.0_Portable.zip
+          release/SHA256SUMS.txt
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
