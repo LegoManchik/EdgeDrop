@@ -11,7 +11,7 @@ Local network peer-to-peer file transfer application for Windows.
 [![Author](https://img.shields.io/badge/author-LegoManchik-orange.svg?style=flat-square)](https://github.com/LegoManchik)
 [![License](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
 
-[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Building](#building) • [Network & Security](#network--security) • [License](#license)
+[Features](#features) • [Screenshots](#screenshots) • [Installation](#installation) • [Usage](#usage) • [Building](#building) • [Network & Security](#network--security) • [License](#license)
 
 </div>
 
@@ -25,6 +25,14 @@ The application supports:
 - Direct PC-to-PC file transfer over TCP sockets.
 - Screen edge drop target for dispatching files to assigned devices.
 - PC-to-mobile transfer via an embedded HTTP server and web interface.
+
+---
+
+## Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/main-window.png" alt="EdgeDrop Main Window" width="800" />
+</p>
 
 ---
 
