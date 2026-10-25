@@ -387,19 +387,21 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OnRegeneratePinClick(object sender, RoutedEventArgs e)
+    private CancellationTokenSource? _pinCounterCts;
+
+    private async void OnRegeneratePinClick(object sender, RoutedEventArgs e)
     {
         if (_web != null && _web.IsRunning)
         {
             string newPin = _web.RegeneratePin();
 
+            _isPinRevealed = true;
             UpdateWebPinDisplay();
-
             RefreshDevicesUi();
 
             if (WebRegeneratePinRotate != null)
             {
-                var spinAnim = new DoubleAnimation(0, 360, TimeSpan.FromMilliseconds(450))
+                var spinAnim = new DoubleAnimation(0, 360, TimeSpan.FromMilliseconds(550))
                 {
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
@@ -407,22 +409,82 @@ public partial class MainWindow : Window
                 WebRegeneratePinRotate.BeginAnimation(RotateTransform.AngleProperty, spinAnim);
             }
 
-            if (WebPinScale != null)
-            {
-                var popAnim = new DoubleAnimation(1.3, 1.0, TimeSpan.FromMilliseconds(320))
-                {
-                    EasingFunction = new BackEase { Amplitude = 0.5, EasingMode = EasingMode.EaseOut }
-                };
+            _pinCounterCts?.Cancel();
+            _pinCounterCts = new CancellationTokenSource();
+            var ct = _pinCounterCts.Token;
 
-                WebPinScale.BeginAnimation(ScaleTransform.ScaleXProperty, popAnim);
-
-                WebPinScale.BeginAnimation(ScaleTransform.ScaleYProperty, popAnim);
-            }
+            await AnimatePinCounterRollAsync(newPin, ct);
 
             ShowToast(isTesting: false, isSuccess: true, text: string.Format(LocalizationManager.GetString("Str_Web_PinReset"), newPin));
 
             AppLogger.Info($"PIN regenerated: {newPin}. All web sessions invalidated.", "Web");
         }
+    }
+
+    private async Task AnimatePinCounterRollAsync(string targetPin, CancellationToken ct)
+    {
+        if (WebPinText == null) return;
+
+        char[] display = WebPinText.Text != null && WebPinText.Text.Length == 4 && !WebPinText.Text.Contains("-") && !WebPinText.Text.Contains("•")
+            ? WebPinText.Text.ToCharArray()
+            : new char[] { '0', '0', '0', '0' };
+
+        char[] target = targetPin.PadRight(4, '0').ToCharArray();
+        int[] lockSteps = { 7, 12, 17, 22 };
+        int totalSteps = 22;
+
+        try
+        {
+            for (int step = 0; step <= totalSteps; step++)
+            {
+                if (ct.IsCancellationRequested) break;
+
+                bool anyLocked = false;
+                for (int d = 0; d < 4; d++)
+                {
+                    if (step >= lockSteps[d])
+                    {
+                        if (display[d] != target[d])
+                        {
+                            display[d] = target[d];
+                            anyLocked = true;
+                        }
+                    }
+                    else
+                    {
+                        int nextVal = ((display[d] - '0') + 1) % 10;
+                        display[d] = (char)('0' + nextVal);
+                    }
+                }
+
+                WebPinText.Text = new string(display);
+
+                if (anyLocked && WebPinScale != null)
+                {
+                    var tickAnim = new DoubleAnimation(1.12, 1.0, TimeSpan.FromMilliseconds(110))
+                    {
+                        EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                    };
+                    WebPinScale.BeginAnimation(ScaleTransform.ScaleXProperty, tickAnim);
+                    WebPinScale.BeginAnimation(ScaleTransform.ScaleYProperty, tickAnim);
+                }
+
+                await Task.Delay(26, ct);
+            }
+
+            WebPinText.Text = targetPin;
+
+            if (WebPinScale != null)
+            {
+                var finalPop = new DoubleAnimation(1.22, 1.0, TimeSpan.FromMilliseconds(220))
+                {
+                    EasingFunction = new BackEase { Amplitude = 0.4, EasingMode = EasingMode.EaseOut }
+                };
+                WebPinScale.BeginAnimation(ScaleTransform.ScaleXProperty, finalPop);
+                WebPinScale.BeginAnimation(ScaleTransform.ScaleYProperty, finalPop);
+            }
+        }
+        catch (OperationCanceledException) { }
     }
 
     private void UpdateWebQrCode()

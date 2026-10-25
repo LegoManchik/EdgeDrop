@@ -1172,6 +1172,7 @@
             </Grid>
 
             <ScrollViewer x:Name="DevicesScrollViewer" Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,8,0"
+                          CanContentScroll="False"
                           PreviewMouseWheel="OnSmoothScrollViewerMouseWheel"
                           ScrollChanged="OnScrollViewerScrollChanged">
 
@@ -1769,6 +1770,7 @@
             </StackPanel>
 
             <ScrollViewer x:Name="SettingsScrollViewer" Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,12" Padding="0,0,8,0"
+                          CanContentScroll="False"
                           PreviewMouseWheel="OnSmoothScrollViewerMouseWheel"
                           ScrollChanged="OnScrollViewerScrollChanged">
 

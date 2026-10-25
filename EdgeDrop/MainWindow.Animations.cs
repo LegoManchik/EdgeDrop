@@ -176,7 +176,7 @@ public partial class MainWindow : Window
 
         var hit = Mouse.DirectlyOver as DependencyObject ?? e.OriginalSource as DependencyObject;
 
-        if (hit != null && IsInsideComboBoxOrDropDown(hit))
+        if (hit != null && IsInsideComboBoxOrDropDown(hit, sv))
         {
             return;
         }
@@ -212,23 +212,17 @@ public partial class MainWindow : Window
         _currentOpenComboBox = null;
     }
 
-    private static bool IsInsideComboBoxOrDropDown(DependencyObject element)
+    private static bool IsInsideComboBoxOrDropDown(DependencyObject element, ScrollViewer pageScrollViewer)
     {
         DependencyObject? current = element;
 
-        while (current != null)
+        while (current != null && current != pageScrollViewer)
         {
             if (current is ComboBox or ComboBoxItem) return true;
 
-            if (current is System.Windows.Controls.Primitives.ScrollBar) return true;
-
-            if (current is System.Windows.Controls.Primitives.Thumb) return true;
-
-            if (current is System.Windows.Controls.Primitives.Track) return true;
-
             var typeName = current.GetType().Name;
 
-            if (typeName.Contains("Popup") || typeName.Contains("DropDown") || typeName.Contains("ComboBox") || typeName.Contains("ScrollBar") || typeName.Contains("Scroll")) return true;
+            if (typeName.Contains("Popup") || typeName.Contains("DropDown")) return true;
 
             if (current is FrameworkElement fe && (fe.Name == "DropDownScrollViewer" || fe.Name == "PART_Popup" || fe.Name == "dropDownBorder"))
             {
@@ -239,12 +233,10 @@ public partial class MainWindow : Window
             {
                 current = VisualTreeHelper.GetParent(current);
             }
-
             else if (current is FrameworkContentElement fce)
             {
                 current = fce.Parent;
             }
-
             else
             {
                 break;

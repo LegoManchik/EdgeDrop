@@ -12,6 +12,8 @@ namespace EdgeDrop;
 
 public partial class MainWindow : Window
 {
+    private string? _justAddedDeviceId;
+    private readonly HashSet<string> _seenSessionIds = new();
     private void RefreshDevicesUi()
     {
         if (DevicesCardsContainer == null) return;
@@ -60,6 +62,35 @@ public partial class MainWindow : Window
             };
 
             cardBorder.SetResourceReference(Border.BackgroundProperty, "CardBackgroundBrush");
+
+            if (device.Id == _justAddedDeviceId)
+            {
+                _justAddedDeviceId = null;
+
+                var scaleTransform = new ScaleTransform(1, 0);
+                cardBorder.LayoutTransform = scaleTransform;
+
+                var translateTransform = new TranslateTransform(0, -16);
+                cardBorder.RenderTransform = translateTransform;
+                cardBorder.Opacity = 0;
+
+                var expandAnim = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(250))
+                {
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                };
+                var slideAnim = new DoubleAnimation(-16, 0, TimeSpan.FromMilliseconds(250))
+                {
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                };
+                var fadeAnim = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(220))
+                {
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                };
+
+                scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, expandAnim);
+                translateTransform.BeginAnimation(TranslateTransform.YProperty, slideAnim);
+                cardBorder.BeginAnimation(UIElement.OpacityProperty, fadeAnim);
+            }
 
             var mainStack = new StackPanel();
 
@@ -219,18 +250,46 @@ public partial class MainWindow : Window
             deleteBtn.Click += (s, e) =>
             {
                 e.Handled = true;
+                deleteBtn.IsEnabled = false;
+                cardBorder.IsHitTestVisible = false;
 
                 string devName = device.Name;
 
-                _settings.RemoveKnownDevice(device.Id);
+                var scaleTransform = new ScaleTransform(1, 1);
+                cardBorder.LayoutTransform = scaleTransform;
 
-                AppLogger.Info($"Device removed: {devName}", "Devices");
+                var translateTransform = new TranslateTransform(0, 0);
+                cardBorder.RenderTransform = translateTransform;
 
-                RefreshDevicesUi();
+                var collapseAnim = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(220))
+                {
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+                };
+                var slideAnim = new DoubleAnimation(0, 35, TimeSpan.FromMilliseconds(180))
+                {
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+                };
+                var fadeAnim = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(180))
+                {
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+                };
 
-                RestartEdges();
+                collapseAnim.Completed += (_, _) =>
+                {
+                    _settings.RemoveKnownDevice(device.Id);
 
-                UpdateIpDisplay();
+                    AppLogger.Info($"Device removed: {devName}", "Devices");
+
+                    RefreshDevicesUi();
+
+                    RestartEdges();
+
+                    UpdateIpDisplay();
+                };
+
+                scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, collapseAnim);
+                translateTransform.BeginAnimation(TranslateTransform.XProperty, slideAnim);
+                cardBorder.BeginAnimation(UIElement.OpacityProperty, fadeAnim);
             };
 
             actionStack.Children.Add(deleteBtn);
@@ -554,6 +613,33 @@ public partial class MainWindow : Window
 
         cardBorder.SetResourceReference(Border.BackgroundProperty, "CardBackgroundBrush");
 
+        if (_seenSessionIds.Add(session.Id))
+        {
+            var scaleTransform = new ScaleTransform(1, 0);
+            cardBorder.LayoutTransform = scaleTransform;
+
+            var translateTransform = new TranslateTransform(0, -16);
+            cardBorder.RenderTransform = translateTransform;
+            cardBorder.Opacity = 0;
+
+            var expandAnim = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(250))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            var slideAnim = new DoubleAnimation(-16, 0, TimeSpan.FromMilliseconds(250))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            var fadeAnim = new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(220))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, expandAnim);
+            translateTransform.BeginAnimation(TranslateTransform.YProperty, slideAnim);
+            cardBorder.BeginAnimation(UIElement.OpacityProperty, fadeAnim);
+        }
+
         var mainStack = new StackPanel();
 
         var headerGrid = new Grid { Margin = new Thickness(0, 0, 0, 0), Cursor = System.Windows.Input.Cursors.Hand };
@@ -704,14 +790,43 @@ public partial class MainWindow : Window
         deleteBtn.Click += (s, e) =>
         {
             e.Handled = true;
+            deleteBtn.IsEnabled = false;
+            cardBorder.IsHitTestVisible = false;
 
             string devName = session.Name;
 
-            _web?.DisconnectSession(session.Id);
+            var scaleTransform = new ScaleTransform(1, 1);
+            cardBorder.LayoutTransform = scaleTransform;
 
-            AppLogger.Info($"Phone session disconnected: {devName} ({session.Ip})", "Devices");
+            var translateTransform = new TranslateTransform(0, 0);
+            cardBorder.RenderTransform = translateTransform;
 
-            RefreshDevicesUi();
+            var collapseAnim = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(220))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+            };
+            var slideAnim = new DoubleAnimation(0, 35, TimeSpan.FromMilliseconds(180))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+            };
+            var fadeAnim = new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(180))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn }
+            };
+
+            collapseAnim.Completed += (_, _) =>
+            {
+                _seenSessionIds.Remove(session.Id);
+                _web?.DisconnectSession(session.Id);
+
+                AppLogger.Info($"Phone session disconnected: {devName} ({session.Ip})", "Devices");
+
+                RefreshDevicesUi();
+            };
+
+            scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, collapseAnim);
+            translateTransform.BeginAnimation(TranslateTransform.XProperty, slideAnim);
+            cardBorder.BeginAnimation(UIElement.OpacityProperty, fadeAnim);
         };
 
         actionStack.Children.Add(deleteBtn);
@@ -1023,6 +1138,7 @@ public partial class MainWindow : Window
             IsCollapsed = false
         };
 
+        _justAddedDeviceId = newDev.Id;
         _settings.AddKnownDevice(newDev);
 
         AppLogger.Info($"Device added: {newDev.Name} ({newDev.Ip}:{newDev.Port})", "Devices");
