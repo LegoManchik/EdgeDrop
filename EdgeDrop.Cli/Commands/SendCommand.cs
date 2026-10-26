@@ -34,16 +34,28 @@ public static class SendCommand
             }
         }
 
-        if (string.IsNullOrWhiteSpace(target))
+        if (files.Count == 0)
         {
-            ConsoleRenderer.Error("Specify target with --to <ip|name>");
+            ConsoleRenderer.Error("No files specified. Usage: send <files...> [--to <target>]");
             return 2;
         }
 
-        if (files.Count == 0)
+        if (string.IsNullOrWhiteSpace(target))
         {
-            ConsoleRenderer.Error("No files specified.");
-            return 2;
+            if (!Console.IsInputRedirected && !ConsoleRenderer.JsonMode)
+            {
+                target = await DevicePicker.PickDeviceAsync(settings);
+                if (string.IsNullOrWhiteSpace(target))
+                {
+                    ConsoleRenderer.Info("Send cancelled.");
+                    return 0;
+                }
+            }
+            else
+            {
+                ConsoleRenderer.Error("Specify target with --to <ip|name>");
+                return 2;
+            }
         }
 
         string targetIp = target;

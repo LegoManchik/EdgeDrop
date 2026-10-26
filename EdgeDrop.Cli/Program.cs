@@ -84,6 +84,7 @@ public static class Program
                 "web" => await WebCommand.RunAsync(cmdArgs),
                 "ping" => await PingCommand.RunAsync(cmdArgs),
                 "status" => StatusCommand.Run(cmdArgs),
+                "qr" => QrCommand.Run(cmdArgs),
                 _ => HandleUnknownCommand(command)
             };
         }
@@ -103,14 +104,16 @@ public static class Program
         Console.Title = $"EdgeDrop CLI v{Version}";
         HeaderRenderer.Initialize();
 
+        var history = new List<string>();
+        string prompt = $"  {ConsoleRenderer.MutedColor}edgedrop{ConsoleRenderer.Reset} {ConsoleRenderer.BrandLight}❯{ConsoleRenderer.Reset} ";
+
         try
         {
             while (true)
             {
                 HeaderRenderer.CheckResize();
-                Console.Write($"  {ConsoleRenderer.MutedColor}edgedrop{ConsoleRenderer.Reset} {ConsoleRenderer.BrandLight}❯{ConsoleRenderer.Reset} ");
 
-                string? line = Console.ReadLine();
+                string? line = ConsoleInput.ReadLine(prompt, history);
                 if (line == null) break;
                 line = line.Trim().Trim('\uFEFF');
                 if (string.IsNullOrEmpty(line)) continue;
@@ -211,6 +214,7 @@ public static class Program
         Console.WriteLine($"    {ConsoleRenderer.BrandLight}receive{ConsoleRenderer.Reset}                         Start listening for incoming files");
         Console.WriteLine($"    {ConsoleRenderer.BrandLight}devices{ConsoleRenderer.Reset}                         Scan local network for EdgeDrop peers");
         Console.WriteLine($"    {ConsoleRenderer.BrandLight}web{ConsoleRenderer.Reset}                             Start web transfer server with QR");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}qr{ConsoleRenderer.Reset} [url]                        Show QR code for mobile connection");
         Console.WriteLine($"    {ConsoleRenderer.BrandLight}ping{ConsoleRenderer.Reset} <target>                   Check latency to a peer");
         Console.WriteLine($"    {ConsoleRenderer.BrandLight}status{ConsoleRenderer.Reset}                          Show active configuration and local IPs");
         Console.WriteLine();

@@ -75,6 +75,12 @@ public static class WebCommand
             await web.StartAsync();
             ConsoleRenderer.Success($"Web server running on {url}");
             ConsoleRenderer.Muted($"Saving uploads to: {saveDir}");
+
+            if (!ConsoleRenderer.JsonMode && !ConsoleRenderer.Quiet)
+            {
+                QrRenderer.Print(url, "Connect Mobile / Peer via Browser");
+            }
+
             ConsoleRenderer.Muted("Press Ctrl+C to stop.");
 
             ConsoleRenderer.WriteJsonEvent("web_started", new { url, port, save_folder = saveDir });
