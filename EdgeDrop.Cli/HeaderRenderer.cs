@@ -13,22 +13,16 @@ public static class HeaderRenderer
 
     private static readonly string[] Logo = new[]
     {
-        "      =++++++++++++-      ",
-        "  +++++++++++++++++++++-  ",
-        " ++++++++++++++++++++++++ ",
-        "-++++++++++++++++++-+++++ ",
-        "++++++++-..=+++++++..++++ ",
-        "+++++++...+++++++++..++++ ",
-        "+++++............=+..++++ ",
-        "+++++............=+..++++ ",
-        "+++++++...+++++++++..++++ ",
-        "++++++++-..=+++++++..++++ ",
-        "-++++++++++++++++++=+++++ ",
-        " ++++++++++++++++++++++++ ",
-        "  +++++++++++++++++++++-  "
+        "█████ ████   ███  █████    ████  ████   ███  ████    ",
+        "█░░░░░█░░░█ █ ░░░ █░░░░░   █░░░█ █░░░█ █ ░░█ █░░░█   ",
+        "████░░█░░░█░█░ ██░████░░░  █░░░█░████░░█░ ░█░████░░  ",
+        "█░░░░ █░░ █░█░░ █░█░░░░    █░░ █░█░░█░ █░░ █░█░░░░ ░ ",
+        "█████░████ ░░███ ░█████░   ████ ░█░░░█░ ███ ░█░░░░░  ",
+        " ░░░░░ ░░░░ ░ ░░░ ░░░░░░    ░░░░ ░░░  ░  ░░░ ░░░     ",
+        "  ░░░░░ ░░░░   ░░░  ░░░░░    ░░░░  ░   ░  ░░░  ░     "
     };
 
-    public static int HeaderHeight => Logo.Length + 2; // 13 rows of logo + 1 divider + 1 workspace row = line 15
+    public static int HeaderHeight => Logo.Length + 2; // 7 rows logo + 1 divider + 1 workspace start = line 9
 
     public static void Initialize()
     {
@@ -36,6 +30,11 @@ public static class HeaderRenderer
 
         try
         {
+            if (Console.WindowWidth < 96)
+            {
+                try { Console.WindowWidth = Math.Max(96, Console.WindowWidth); } catch { }
+            }
+
             int height = Math.Max(HeaderHeight + 5, Console.WindowHeight);
             int width = Math.Max(50, Console.WindowWidth);
             _lastWidth = width;
@@ -97,20 +96,16 @@ public static class HeaderRenderer
 
             string[] infoLines = new string[]
             {
-                "",
-                "",
                 $"{ConsoleRenderer.TextLight}{ConsoleRenderer.Bold}EdgeDrop{ConsoleRenderer.Reset}  {ConsoleRenderer.BrandLight}v{Program.Version}{ConsoleRenderer.Reset}",
                 $"{ConsoleRenderer.DarkMuted}Local Network Peer-to-Peer Transfer{ConsoleRenderer.Reset}",
-                "",
                 $"{ConsoleRenderer.MutedColor}Port:{ConsoleRenderer.Reset} {ConsoleRenderer.TextLight}{settings.Port}{ConsoleRenderer.Reset}   {ConsoleRenderer.DarkMuted}·{ConsoleRenderer.Reset}   {ConsoleRenderer.MutedColor}IP:{ConsoleRenderer.Reset} {ConsoleRenderer.BrandLight}{_cachedIp}{ConsoleRenderer.Reset}",
                 $"{ConsoleRenderer.MutedColor}Discovery:{ConsoleRenderer.Reset} {ConsoleRenderer.TextLight}{(settings.AutoDiscoveryEnabled ? "Active" : "Off")}{ConsoleRenderer.Reset}   {ConsoleRenderer.DarkMuted}·{ConsoleRenderer.Reset}   {ConsoleRenderer.MutedColor}Safe Mode:{ConsoleRenderer.Reset} {ConsoleRenderer.TextLight}{(settings.SafeModeEnabled ? "On" : "Off")}{ConsoleRenderer.Reset}",
                 $"{ConsoleRenderer.MutedColor}Status:{ConsoleRenderer.Reset} {ConsoleRenderer.SuccessColor}Online ● Ready{ConsoleRenderer.Reset}",
-                "",
                 $"{ConsoleRenderer.DarkMuted}Type 'help' for commands, 'exit' to quit.{ConsoleRenderer.Reset}",
-                "",
-                "",
                 ""
             };
+
+            bool showInfo = width >= 90;
 
             for (int i = 0; i < Logo.Length; i++)
             {
@@ -118,9 +113,14 @@ public static class HeaderRenderer
                 Console.Write($"\x1b[{row};1H\x1b[2K");
 
                 string logoPart = $"{ConsoleRenderer.Brand}{Logo[i]}{ConsoleRenderer.Reset}";
-                string infoPart = i < infoLines.Length ? infoLines[i] : "";
-
-                Console.Write($"  {logoPart}   {infoPart}");
+                if (showInfo && i < infoLines.Length && !string.IsNullOrEmpty(infoLines[i]))
+                {
+                    Console.Write($"  {logoPart}   {infoLines[i]}");
+                }
+                else
+                {
+                    Console.Write($"  {logoPart}");
+                }
             }
 
             // Divider row
