@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdgeDrop", "EdgeDrop\EdgeDr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdgeDrop.Core", "EdgeDrop.Core\EdgeDrop.Core.csproj", "{5A1CE65B-8D26-4A7C-A3C8-2A8B20B89965}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdgeDrop.Cli", "EdgeDrop.Cli\EdgeDrop.Cli.csproj", "{102BC891-1E5D-474E-A2F3-8F5262B51614}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,18 @@ Global
 		{5A1CE65B-8D26-4A7C-A3C8-2A8B20B89965}.Release|x64.Build.0 = Release|Any CPU
 		{5A1CE65B-8D26-4A7C-A3C8-2A8B20B89965}.Release|x86.ActiveCfg = Release|Any CPU
 		{5A1CE65B-8D26-4A7C-A3C8-2A8B20B89965}.Release|x86.Build.0 = Release|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Debug|x64.Build.0 = Debug|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Debug|x86.Build.0 = Debug|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Release|Any CPU.Build.0 = Release|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Release|x64.ActiveCfg = Release|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Release|x64.Build.0 = Release|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Release|x86.ActiveCfg = Release|Any CPU
+		{102BC891-1E5D-474E-A2F3-8F5262B51614}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
