@@ -13,8 +13,14 @@ public static class Program
 
     public static async Task<int> Main(string[] args)
     {
-        // When launched with NO arguments (e.g. double-clicked from Explorer or 'edgedrop-cli' in console):
-        // Start interactive shell so the window stays open!
+        try
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+        }
+        catch { }
+
+        // When launched with NO arguments (double-clicked or 'edgedrop-cli' in console):
+        // Start interactive shell
         if (args.Length == 0)
         {
             return await RunInteractiveShellAsync();
@@ -83,7 +89,7 @@ public static class Program
         }
         catch (Exception ex)
         {
-            ConsoleRenderer.Error($"Fatal error: {ex.Message}");
+            ConsoleRenderer.Error($"Fatal: {ex.Message}");
             if (ConsoleRenderer.JsonMode)
             {
                 ConsoleRenderer.WriteJson(new { status = "fatal_error", error = ex.ToString() });
@@ -95,21 +101,16 @@ public static class Program
     private static async Task<int> RunInteractiveShellAsync()
     {
         Console.Title = $"EdgeDrop CLI v{Version}";
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"=================================================");
-        Console.WriteLine($"      EdgeDrop Interactive Shell (v{Version})     ");
-        Console.WriteLine($"=================================================");
-        Console.ResetColor();
-        Console.WriteLine("Type a command or 'help' for options. Type 'exit' to quit.\n");
+        Console.WriteLine();
+        Console.WriteLine($"  {ConsoleRenderer.Brand}{ConsoleRenderer.Bold}EdgeDrop CLI{ConsoleRenderer.Reset} {ConsoleRenderer.DarkMuted}v{Version}{ConsoleRenderer.Reset}  {ConsoleRenderer.MutedColor}Type 'help' for commands, 'exit' to quit.{ConsoleRenderer.Reset}");
+        Console.WriteLine();
 
         while (true)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("edgedrop> ");
-            Console.ResetColor();
+            Console.Write($"  {ConsoleRenderer.MutedColor}edgedrop{ConsoleRenderer.Reset} {ConsoleRenderer.BrandLight}❯{ConsoleRenderer.Reset} ");
 
             string? line = Console.ReadLine();
-            if (line == null) break; // EOF or Ctrl+Z
+            if (line == null) break;
             line = line.Trim().Trim('\uFEFF');
             if (string.IsNullOrEmpty(line)) continue;
 
@@ -135,9 +136,6 @@ public static class Program
             }
         }
 
-        Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.WriteLine("Bye!");
-        Console.ResetColor();
         return 0;
     }
 
@@ -178,8 +176,7 @@ public static class Program
 
     private static int HandleUnknownCommand(string command)
     {
-        ConsoleRenderer.Error($"Unknown command '{command}'.");
-        ConsoleRenderer.Muted("Type 'help' for a list of available commands.");
+        ConsoleRenderer.Error($"Unknown command '{command}'. Type 'help' for available commands.");
         return 2;
     }
 
@@ -196,35 +193,25 @@ public static class Program
             return;
         }
 
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine($"EdgeDrop CLI v{Version} — Fast local network file transfer utility");
-        Console.ResetColor();
         Console.WriteLine();
-        Console.WriteLine("USAGE:");
-        Console.WriteLine("  edgedrop-cli <command> [options]");
+        Console.WriteLine($"  {ConsoleRenderer.Brand}{ConsoleRenderer.Bold}EdgeDrop CLI{ConsoleRenderer.Reset} {ConsoleRenderer.DarkMuted}v{Version}{ConsoleRenderer.Reset}");
         Console.WriteLine();
-        Console.WriteLine("COMMANDS:");
-        Console.WriteLine("  send <files...> --to <target>   Send file(s) to a peer by IP or configured name");
-        Console.WriteLine("  receive, listen                 Start listening for incoming file transfers");
-        Console.WriteLine("  devices, scan                   Scan local network for active EdgeDrop peers");
-        Console.WriteLine("  web                             Start browser-based web transfer server with QR");
-        Console.WriteLine("  ping <target>                   Test connectivity and latency to a peer");
-        Console.WriteLine("  status                          Show current configuration, ports, and local IPs");
-        Console.WriteLine("  help                            Show this help information");
-        Console.WriteLine("  exit, quit                      Exit the interactive shell");
+        Console.WriteLine($"  {ConsoleRenderer.Bold}Usage:{ConsoleRenderer.Reset}");
+        Console.WriteLine($"    edgedrop-cli <command> [options]");
         Console.WriteLine();
-        Console.WriteLine("OPTIONS:");
-        Console.WriteLine("  --json                          Output machine-readable JSON (ideal for scripts)");
-        Console.WriteLine("  --quiet, -q                     Suppress non-essential progress and info messages");
-        Console.WriteLine("  --version, -v                   Show CLI version");
-        Console.WriteLine("  --help, -h                      Show this help information");
+        Console.WriteLine($"  {ConsoleRenderer.Bold}Commands:{ConsoleRenderer.Reset}");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}send{ConsoleRenderer.Reset} <files...> --to <target>   Send file(s) to a peer or IP");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}receive{ConsoleRenderer.Reset}                         Start listening for incoming files");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}devices{ConsoleRenderer.Reset}                         Scan local network for EdgeDrop peers");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}web{ConsoleRenderer.Reset}                             Start web transfer server with QR");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}ping{ConsoleRenderer.Reset} <target>                   Check latency to a peer");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}status{ConsoleRenderer.Reset}                          Show active configuration and local IPs");
         Console.WriteLine();
-        Console.WriteLine("EXAMPLES:");
-        Console.WriteLine("  send report.pdf --to 192.168.1.15");
-        Console.WriteLine("  send photo.png archive.zip --to \"Laptop\"");
-        Console.WriteLine("  receive --yes --dir \"C:\\Incoming\"");
-        Console.WriteLine("  devices --json");
-        Console.WriteLine("  ping 192.168.1.15");
+        Console.WriteLine($"  {ConsoleRenderer.Bold}Options:{ConsoleRenderer.Reset}");
+        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--json{ConsoleRenderer.Reset}                          Machine-readable JSON output");
+        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--quiet, -q{ConsoleRenderer.Reset}                     Suppress progress and info messages");
+        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--version, -v{ConsoleRenderer.Reset}                   Show version");
+        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--help, -h{ConsoleRenderer.Reset}                      Show this help");
         Console.WriteLine();
     }
 }

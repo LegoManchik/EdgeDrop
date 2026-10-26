@@ -40,7 +40,7 @@ public static class WebCommand
 
         web.UploadStarted += (fileName, totalBytes) =>
         {
-            ConsoleRenderer.Info($"Web upload started: '{fileName}' ({ConsoleRenderer.FormatBytes(totalBytes)})");
+            ConsoleRenderer.Info($"Web upload: '{fileName}' ({ConsoleRenderer.FormatBytes(totalBytes)})");
             ConsoleRenderer.WriteJsonEvent("web_upload_start", new { file = fileName, size = totalBytes });
         };
 
@@ -52,14 +52,14 @@ public static class WebCommand
         web.UploadCompleted += fileName =>
         {
             ConsoleRenderer.FinishProgress();
-            ConsoleRenderer.Success($"Web upload completed: '{fileName}'");
+            ConsoleRenderer.Success($"Uploaded: '{fileName}'");
             ConsoleRenderer.WriteJsonEvent("web_upload_complete", new { file = fileName });
         };
 
         web.Error += err =>
         {
             ConsoleRenderer.FinishProgress();
-            ConsoleRenderer.Error($"Web server error: {err}");
+            ConsoleRenderer.Error($"{err}");
             ConsoleRenderer.WriteJsonEvent("web_error", new { error = err });
         };
 
@@ -73,10 +73,9 @@ public static class WebCommand
         try
         {
             await web.StartAsync();
-            ConsoleRenderer.Success($"Web Transfer Server started on: {url}");
-            ConsoleRenderer.Info($"Saving uploads to: {saveDir}");
-            ConsoleRenderer.Muted("Open this URL on your phone or any browser in the local network.");
-            ConsoleRenderer.Info("Press Ctrl+C to stop the web server.");
+            ConsoleRenderer.Success($"Web server running on {url}");
+            ConsoleRenderer.Muted($"Saving uploads to: {saveDir}");
+            ConsoleRenderer.Muted("Press Ctrl+C to stop.");
 
             ConsoleRenderer.WriteJsonEvent("web_started", new { url, port, save_folder = saveDir });
 
@@ -87,11 +86,10 @@ public static class WebCommand
         }
         catch (OperationCanceledException)
         {
-            ConsoleRenderer.Info("Stopping web server...");
         }
         catch (Exception ex)
         {
-            ConsoleRenderer.Error($"Failed to start web server: {ex.Message}");
+            ConsoleRenderer.Error($"{ex.Message}");
             return 1;
         }
         finally
@@ -99,7 +97,7 @@ public static class WebCommand
             await web.StopAsync();
         }
 
-        ConsoleRenderer.Success("Web server stopped.");
+        ConsoleRenderer.Info("Stopped.");
         return 0;
     }
 

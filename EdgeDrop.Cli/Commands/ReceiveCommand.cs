@@ -39,7 +39,7 @@ public static class ReceiveCommand
             }
             catch (Exception ex)
             {
-                ConsoleRenderer.Error($"Cannot create directory '{saveDir}': {ex.Message}");
+                ConsoleRenderer.Error($"Cannot create '{saveDir}': {ex.Message}");
                 return 2;
             }
         }
@@ -50,7 +50,7 @@ public static class ReceiveCommand
         {
             if (autoAccept)
             {
-                ConsoleRenderer.Info($"Auto-accepted '{fileName}' ({ConsoleRenderer.FormatBytes(size)}) from {remoteIp}");
+                ConsoleRenderer.Info($"Auto-accepted '{fileName}' from {remoteIp}");
                 return true;
             }
 
@@ -58,16 +58,12 @@ public static class ReceiveCommand
 
             if (ConsoleRenderer.JsonMode)
             {
-                // In non-interactive json mode without --yes, reject or accept based on settings
                 return !settings.RequireAcceptIncoming;
             }
 
             Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write($"[?] Incoming file: '{fileName}' ({ConsoleRenderer.FormatBytes(size)}) from {remoteIp}. Accept? [Y/n]: ");
-            Console.ResetColor();
+            Console.Write($"  {ConsoleRenderer.WarningColor}?{ConsoleRenderer.Reset} Incoming '{fileName}' ({ConsoleRenderer.FormatBytes(size)}) from {remoteIp} · Accept? [Y/n]: ");
 
-            // Wait for user input or 30 sec timeout
             var tcs = new TaskCompletionSource<bool>();
             using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             timeoutCts.Token.Register(() => tcs.TrySetResult(false));
@@ -82,11 +78,11 @@ public static class ReceiveCommand
             bool result = await tcs.Task;
             if (result)
             {
-                ConsoleRenderer.Success($"Accepted '{fileName}'.");
+                ConsoleRenderer.Success($"Accepted '{fileName}'");
             }
             else
             {
-                ConsoleRenderer.Warning($"Rejected '{fileName}'.");
+                ConsoleRenderer.Warning($"Rejected '{fileName}'");
             }
             return result;
         };
@@ -105,21 +101,21 @@ public static class ReceiveCommand
         receiver.ReceiveCompleted += fileName =>
         {
             ConsoleRenderer.FinishProgress();
-            ConsoleRenderer.Success($"Received '{fileName}' saved to: {Path.Combine(saveDir, fileName)}");
+            ConsoleRenderer.Success($"Received '{fileName}'");
             ConsoleRenderer.WriteJsonEvent("receive_complete", new { file = fileName, save_dir = saveDir });
         };
 
         receiver.ReceiveCancelled += fileName =>
         {
             ConsoleRenderer.FinishProgress();
-            ConsoleRenderer.Warning($"Receive cancelled: '{fileName}'");
+            ConsoleRenderer.Warning($"Cancelled '{fileName}'");
             ConsoleRenderer.WriteJsonEvent("receive_cancelled", new { file = fileName });
         };
 
         receiver.Error += err =>
         {
             ConsoleRenderer.FinishProgress();
-            ConsoleRenderer.Error($"Receiver error: {err}");
+            ConsoleRenderer.Error($"{err}");
             ConsoleRenderer.WriteJsonEvent("receive_error", new { error = err });
         };
 
@@ -133,8 +129,8 @@ public static class ReceiveCommand
         try
         {
             receiver.Start();
-            ConsoleRenderer.Success($"Listening on port {port}. Save folder: {saveDir}");
-            ConsoleRenderer.Info("Press Ctrl+C to stop listening.");
+            ConsoleRenderer.Info($"Listening on port {port} · {saveDir}");
+            ConsoleRenderer.Muted("Press Ctrl+C to stop.");
             ConsoleRenderer.WriteJsonEvent("listening", new { port, save_folder = saveDir, auto_accept = autoAccept });
 
             while (!cts.Token.IsCancellationRequested)
@@ -144,11 +140,10 @@ public static class ReceiveCommand
         }
         catch (OperationCanceledException)
         {
-            ConsoleRenderer.Info("Stopping receiver...");
         }
         catch (Exception ex)
         {
-            ConsoleRenderer.Error($"Failed to start receiver: {ex.Message}");
+            ConsoleRenderer.Error($"{ex.Message}");
             return 1;
         }
         finally
@@ -156,7 +151,7 @@ public static class ReceiveCommand
             receiver.Stop();
         }
 
-        ConsoleRenderer.Success("Receiver stopped.");
+        ConsoleRenderer.Info("Stopped.");
         return 0;
     }
 }

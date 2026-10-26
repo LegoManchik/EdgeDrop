@@ -36,18 +36,16 @@ public static class SendCommand
 
         if (string.IsNullOrWhiteSpace(target))
         {
-            ConsoleRenderer.Error("Target device or IP must be specified with --to <target>");
-            ConsoleRenderer.Muted("Example: edgedrop-cli send document.pdf --to 192.168.1.15");
+            ConsoleRenderer.Error("Specify target with --to <ip|name>");
             return 2;
         }
 
         if (files.Count == 0)
         {
-            ConsoleRenderer.Error("No files specified to send.");
+            ConsoleRenderer.Error("No files specified.");
             return 2;
         }
 
-        // Resolve target from known devices or direct IP
         string targetIp = target;
         if (target.Contains(':'))
         {
@@ -67,7 +65,6 @@ public static class SendCommand
             }
         }
 
-        ConsoleRenderer.Info($"Target: {targetIp}:{port}");
         ConsoleRenderer.WriteJsonEvent("transfer_started", new { target_ip = targetIp, port, file_count = files.Count });
 
         int failed = 0;
@@ -82,7 +79,6 @@ public static class SendCommand
             {
                 string dirName = Path.GetFileName(file.TrimEnd('\\', '/'));
                 string tempZip = Path.Combine(Path.GetTempPath(), $"{dirName}_{Guid.NewGuid():N}.zip");
-                ConsoleRenderer.Info($"Compressing directory '{dirName}'...");
                 ZipFile.CreateFromDirectory(file, tempZip, CompressionLevel.Fastest, false);
                 actualPath = tempZip;
                 isTempZip = true;
@@ -97,7 +93,7 @@ public static class SendCommand
             string fileName = Path.GetFileName(actualPath);
             long fileSize = new FileInfo(actualPath).Length;
 
-            ConsoleRenderer.Info($"Sending '{fileName}' ({ConsoleRenderer.FormatBytes(fileSize)})...");
+            ConsoleRenderer.Info($"Sending '{fileName}' ({ConsoleRenderer.FormatBytes(fileSize)}) to {targetIp}:{port}");
 
             var progress = new Progress<TransferProgressReport>(report =>
             {
@@ -118,7 +114,7 @@ public static class SendCommand
                 swFile.Stop();
 
                 ConsoleRenderer.FinishProgress();
-                ConsoleRenderer.Success($"Sent '{fileName}' in {swFile.Elapsed:mm\\:ss\\.ff}");
+                ConsoleRenderer.Success($"Sent in {swFile.Elapsed:s\\.f}s");
                 ConsoleRenderer.WriteJsonEvent("file_complete", new
                 {
                     file = fileName,
@@ -130,14 +126,14 @@ public static class SendCommand
             catch (OperationCanceledException)
             {
                 ConsoleRenderer.FinishProgress();
-                ConsoleRenderer.Warning($"Transfer cancelled by user: {fileName}");
+                ConsoleRenderer.Warning($"Cancelled");
                 failed++;
                 break;
             }
             catch (Exception ex)
             {
                 ConsoleRenderer.FinishProgress();
-                ConsoleRenderer.Error($"Failed to send '{fileName}': {ex.Message}");
+                ConsoleRenderer.Error($"{ex.Message}");
                 ConsoleRenderer.WriteJsonEvent("file_error", new { file = fileName, error = ex.Message });
                 failed++;
             }
@@ -153,14 +149,12 @@ public static class SendCommand
         swTotal.Stop();
         if (failed == 0)
         {
-            ConsoleRenderer.Success($"All {files.Count} file(s) sent successfully in {swTotal.Elapsed:mm\\:ss}!");
             ConsoleRenderer.WriteJsonEvent("finished", new { status = "success", duration_ms = swTotal.ElapsedMilliseconds });
             return 0;
         }
         else
         {
-            ConsoleRenderer.Error($"Transfer finished with {failed} failure(s).");
-            ConsoleRenderer.WriteJsonEvent("finished", new { status = "partial_or_failed", failed, duration_ms = swTotal.ElapsedMilliseconds });
+            ConsoleRenderer.WriteJsonEvent("finished", new { status = "failed", failed, duration_ms = swTotal.ElapsedMilliseconds });
             return 1;
         }
     }

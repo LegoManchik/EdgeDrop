@@ -24,7 +24,7 @@ public static class PingCommand
 
         if (string.IsNullOrWhiteSpace(target))
         {
-            ConsoleRenderer.Error("Target IP or device name required: edgedrop-cli ping <ip>");
+            ConsoleRenderer.Error("Target required: ping <ip|name>");
             return 2;
         }
 
@@ -45,8 +45,6 @@ public static class PingCommand
             }
         }
 
-        ConsoleRenderer.Info($"Pinging {targetIp}:{port}...");
-
         try
         {
             using var client = new TcpClient();
@@ -55,7 +53,7 @@ public static class PingCommand
             await client.ConnectAsync(targetIp, port, cts.Token);
             sw.Stop();
 
-            ConsoleRenderer.Success($"Reply from {targetIp}:{port} — Latency: {sw.ElapsedMilliseconds} ms");
+            ConsoleRenderer.Success($"Reply from {targetIp}:{port} · {sw.ElapsedMilliseconds} ms");
             ConsoleRenderer.WriteJson(new
             {
                 target = targetIp,
@@ -67,7 +65,7 @@ public static class PingCommand
         }
         catch (Exception ex)
         {
-            ConsoleRenderer.Error($"Ping failed to {targetIp}:{port}: {ex.Message}");
+            ConsoleRenderer.Error($"Ping failed to {targetIp}:{port} · {ex.Message}");
             ConsoleRenderer.WriteJson(new
             {
                 target = targetIp,

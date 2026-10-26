@@ -11,7 +11,7 @@ public static class DevicesCommand
     public static async Task<int> RunAsync(string[] args)
     {
         var settings = Settings.Load();
-        bool scan = true; // default to scan
+        bool scan = true;
         int timeoutSec = 2;
 
         for (int i = 0; i < args.Length; i++)
@@ -33,7 +33,7 @@ public static class DevicesCommand
 
         var results = new Dictionary<string, (string Name, string Ip, int Port, bool IsOnline, string Source)>(StringComparer.OrdinalIgnoreCase);
 
-        // Add saved devices from settings
+        // Add saved devices
         foreach (var dev in settings.Devices)
         {
             if (!string.IsNullOrWhiteSpace(dev.Ip))
@@ -44,7 +44,7 @@ public static class DevicesCommand
 
         if (scan)
         {
-            ConsoleRenderer.Info($"Scanning local network for EdgeDrop peers ({timeoutSec}s)...");
+            ConsoleRenderer.Info($"Scanning local network ({timeoutSec}s)...");
             using var discovery = new DeviceDiscoveryService(settings);
 
             discovery.NewDeviceDiscovered += dev =>
@@ -85,33 +85,23 @@ public static class DevicesCommand
 
         if (results.Count == 0)
         {
-            ConsoleRenderer.Warning("No devices found on the local network.");
-            ConsoleRenderer.Muted("Tip: Ensure EdgeDrop is running on the other device and connected to the same Wi-Fi/LAN.");
+            ConsoleRenderer.Warning("No devices found on local network.");
             return 0;
         }
 
         Console.WriteLine();
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine($"{"NAME",-22} {"IP ADDRESS",-18} {"PORT",-8} {"STATUS",-12} {"SOURCE"}");
-        Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.WriteLine(new string('-', 72));
-        Console.ResetColor();
+        Console.WriteLine($"  {ConsoleRenderer.DarkMuted}{"DEVICE",-22} {"IP ADDRESS",-18} {"PORT",-8} {"STATUS"}{ConsoleRenderer.Reset}");
 
         foreach (var item in results.Values)
         {
-            string statusStr = item.IsOnline ? "Online" : "Unknown/Offline";
-            ConsoleColor statusColor = item.IsOnline ? ConsoleColor.Green : ConsoleColor.DarkGray;
+            string statusIcon = item.IsOnline ? "●" : "○";
+            string statusColor = item.IsOnline ? ConsoleRenderer.SuccessColor : ConsoleRenderer.DarkMuted;
+            string statusText = item.IsOnline ? "Online" : "Offline";
 
-            Console.Write($"{item.Name,-22} {item.Ip,-18} {item.Port,-8} ");
-            Console.ForegroundColor = statusColor;
-            Console.Write($"{statusStr,-12} ");
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine(item.Source);
-            Console.ResetColor();
+            Console.WriteLine($"  {ConsoleRenderer.TextLight}{item.Name,-22}{ConsoleRenderer.Reset} {ConsoleRenderer.MutedColor}{item.Ip,-18}{ConsoleRenderer.Reset} {ConsoleRenderer.MutedColor}{item.Port,-8}{ConsoleRenderer.Reset} {statusColor}{statusIcon} {statusText}{ConsoleRenderer.Reset}");
         }
 
         Console.WriteLine();
-        ConsoleRenderer.Success($"Found {results.Count} device(s).");
         return 0;
     }
 }

@@ -37,19 +37,20 @@ public static class StatusCommand
         }
 
         Console.WriteLine();
-        Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("=== EdgeDrop Status & Configuration ===");
-        Console.ResetColor();
-        Console.WriteLine($"  TCP Port:           {settings.Port}");
-        Console.WriteLine($"  Save Folder:        {settings.SaveFolder}");
-        Console.WriteLine($"  Local IPs:          {string.Join(", ", localIps)}");
-        Console.WriteLine($"  Auto Discovery:     {(settings.AutoDiscoveryEnabled ? "Enabled" : "Disabled")}");
-        Console.WriteLine($"  Safe Mode:          {(settings.SafeModeEnabled ? "Enabled" : "Disabled")}");
-        Console.WriteLine($"  Require Accept:     {(settings.RequireAcceptIncoming ? "Yes" : "No")}");
-        Console.WriteLine($"  Speed Limit:        {(settings.SpeedLimitKBps > 0 ? $"{settings.SpeedLimitKBps} KB/s" : "Unlimited")}");
-        Console.WriteLine($"  Saved Devices:      {settings.Devices.Count}");
+        PrintRow("Port", settings.Port.ToString());
+        PrintRow("Folder", settings.SaveFolder);
+        PrintRow("IPs", string.Join(", ", localIps));
+        PrintRow("Discovery", settings.AutoDiscoveryEnabled ? "Active" : "Disabled");
+        PrintRow("Safe Mode", settings.SafeModeEnabled ? "Enabled" : "Disabled");
+        PrintRow("Accept", settings.RequireAcceptIncoming ? "Manual confirmation" : "Automatic");
+        PrintRow("Devices", $"{settings.Devices.Count} saved");
         Console.WriteLine();
 
         return 0;
+    }
+
+    private static void PrintRow(string label, string value)
+    {
+        Console.WriteLine($"  {ConsoleRenderer.MutedColor}{label,-12}{ConsoleRenderer.Reset} {ConsoleRenderer.TextLight}{value}{ConsoleRenderer.Reset}");
     }
 }
