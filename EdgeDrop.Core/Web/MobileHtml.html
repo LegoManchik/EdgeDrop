@@ -2289,6 +2289,24 @@ async function tryLogin() {
   }
 }
 
+function checkUrlPin() {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const p = urlParams.get('pin');
+    if (p && p.length === 4 && /^\d+$/.test(p)) {
+      for (let i = 0; i < 4; i++) {
+        if (pinCells[i]) {
+          pinCells[i].value = p[i];
+          pinCells[i].classList.add('filled');
+        }
+      }
+      tryLogin();
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
 fetch('/auth-check')
 
   .then(r => {
@@ -2301,14 +2319,14 @@ fetch('/auth-check')
     } else {
       document.getElementById('auth').style.display = 'flex';
       document.getElementById('app').style.display = 'none';
-      setTimeout(() => { if (pinCells[0]) pinCells[0].focus(); }, 150);
+      if (!checkUrlPin()) { setTimeout(() => { if (pinCells[0]) pinCells[0].focus(); }, 150); }
     }
   })
 
   .catch(() => {
     document.getElementById('auth').style.display = 'flex';
     document.getElementById('app').style.display = 'none';
-    setTimeout(() => { if (pinCells[0]) pinCells[0].focus(); }, 150);
+    if (!checkUrlPin()) { setTimeout(() => { if (pinCells[0]) pinCells[0].focus(); }, 150); }
   });
 
 </script>

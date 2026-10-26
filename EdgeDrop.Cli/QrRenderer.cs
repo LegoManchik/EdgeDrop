@@ -10,18 +10,24 @@ public static class QrRenderer
     /// Renders a sharp, compact QR code using Unicode half-block characters
     /// (2 vertical modules per terminal character cell).
     /// </summary>
-    public static void Print(string payload, string? caption = null)
+    public static void Print(string payload, string? caption = null, string? pin = null)
     {
+        string qrPayload = payload;
+        if (!string.IsNullOrEmpty(pin) && !payload.Contains("pin=", StringComparison.OrdinalIgnoreCase))
+        {
+            qrPayload = payload.Contains('?') ? $"{payload}&pin={pin}" : $"{payload.TrimEnd('/')}/?pin={pin}";
+        }
+
         if (ConsoleRenderer.JsonMode)
         {
-            ConsoleRenderer.WriteJson(new { qr_url = payload, caption });
+            ConsoleRenderer.WriteJson(new { qr_url = qrPayload, pin, caption });
             return;
         }
 
         try
         {
             var qrGenerator = new QRCodeGenerator();
-            var qrCodeData = qrGenerator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.M);
+            var qrCodeData = qrGenerator.CreateQrCode(qrPayload, QRCodeGenerator.ECCLevel.M);
             var matrix = qrCodeData.ModuleMatrix;
 
             int height = matrix.Count;
@@ -33,6 +39,10 @@ public static class QrRenderer
                 Console.WriteLine($"  {ConsoleRenderer.BrandLight}{ConsoleRenderer.Bold}{caption}{ConsoleRenderer.Reset}");
             }
             Console.WriteLine($"  {ConsoleRenderer.MutedColor}URL:{ConsoleRenderer.Reset} {ConsoleRenderer.TextLight}{payload}{ConsoleRenderer.Reset}");
+            if (!string.IsNullOrEmpty(pin))
+            {
+                Console.WriteLine($"  {ConsoleRenderer.MutedColor}PIN:{ConsoleRenderer.Reset} {ConsoleRenderer.BrandLight}{ConsoleRenderer.Bold}{pin}{ConsoleRenderer.Reset}");
+            }
             Console.WriteLine();
 
             // Colors: White background (\x1b[47m), Black foreground (\x1b[30m)
@@ -94,7 +104,15 @@ public static class QrRenderer
             Console.WriteLine(Reset);
 
             Console.WriteLine();
-            Console.WriteLine($"  {ConsoleRenderer.DarkMuted}Scan with your phone camera to connect instantly.{ConsoleRenderer.Reset}");
+            if (!string.IsNullOrEmpty(pin))
+            {
+                Console.WriteLine($"  {ConsoleRenderer.BrandLight}{ConsoleRenderer.Bold}PIN CODE:{ConsoleRenderer.Reset} {ConsoleRenderer.TextLight}{ConsoleRenderer.Bold}{pin}{ConsoleRenderer.Reset}  {ConsoleRenderer.DarkMuted}(enter on phone if prompted){ConsoleRenderer.Reset}");
+                Console.WriteLine($"  {ConsoleRenderer.DarkMuted}Scan with your phone camera to connect and log in automatically.{ConsoleRenderer.Reset}");
+            }
+            else
+            {
+                Console.WriteLine($"  {ConsoleRenderer.DarkMuted}Scan with your phone camera to connect instantly.{ConsoleRenderer.Reset}");
+            }
             Console.WriteLine();
         }
         catch (Exception ex)

@@ -72,17 +72,24 @@ public static class WebCommand
         try
         {
             await web.StartAsync();
+            string pin = web.Pin;
+
+            Console.WriteLine();
             ConsoleRenderer.Success($"Web server running on {url}");
+            if (settings.SafeModeEnabled && !string.IsNullOrEmpty(pin))
+            {
+                Console.WriteLine($"  {ConsoleRenderer.BrandLight}{ConsoleRenderer.Bold}PIN CODE:{ConsoleRenderer.Reset} {ConsoleRenderer.TextLight}{ConsoleRenderer.Bold}{pin}{ConsoleRenderer.Reset}  {ConsoleRenderer.DarkMuted}(enter on phone){ConsoleRenderer.Reset}");
+            }
             ConsoleRenderer.Muted($"Saving uploads to: {saveDir}");
 
             if (!ConsoleRenderer.JsonMode && !ConsoleRenderer.Quiet)
             {
-                QrRenderer.Print(url, "Connect Mobile / Peer via Browser");
+                QrRenderer.Print(url, "Connect Mobile / Peer via Browser", settings.SafeModeEnabled ? pin : null);
             }
 
             ConsoleRenderer.Muted("Press Ctrl+C to stop.");
 
-            ConsoleRenderer.WriteJsonEvent("web_started", new { url, port, save_folder = saveDir });
+            ConsoleRenderer.WriteJsonEvent("web_started", new { url, port, pin, safe_mode = settings.SafeModeEnabled, save_folder = saveDir });
 
             while (!cts.Token.IsCancellationRequested)
             {

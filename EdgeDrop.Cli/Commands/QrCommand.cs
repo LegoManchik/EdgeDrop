@@ -8,7 +8,21 @@ public static class QrCommand
 {
     public static int Run(string[] args)
     {
-        string? targetUrl = args.FirstOrDefault(a => !a.StartsWith("-"));
+        string? targetUrl = null;
+        string? pin = null;
+
+        for (int i = 0; i < args.Length; i++)
+        {
+            string arg = args[i];
+            if (arg is "--pin" or "-p" && i + 1 < args.Length)
+            {
+                pin = args[++i];
+            }
+            else if (!arg.StartsWith("-") && targetUrl == null)
+            {
+                targetUrl = arg;
+            }
+        }
 
         if (string.IsNullOrWhiteSpace(targetUrl))
         {
@@ -18,7 +32,7 @@ public static class QrCommand
             targetUrl = $"http://{ip}:{webPort}/";
         }
 
-        QrRenderer.Print(targetUrl, "EdgeDrop Web Transfer QR Code");
+        QrRenderer.Print(targetUrl, "EdgeDrop Web Transfer QR Code", pin);
         return 0;
     }
 }
