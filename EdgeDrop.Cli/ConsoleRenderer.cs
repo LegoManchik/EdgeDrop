@@ -83,6 +83,7 @@ public static class ConsoleRenderer
 
     public static void WriteJson(object data)
     {
+        if (!JsonMode) return;
         lock (ConsoleLock)
         {
             string json = JsonSerializer.Serialize(data, JsonOpts);
@@ -92,6 +93,7 @@ public static class ConsoleRenderer
 
     public static void WriteJsonEvent(string eventName, object? details = null)
     {
+        if (!JsonMode) return;
         lock (ConsoleLock)
         {
             var dict = new Dictionary<string, object?>

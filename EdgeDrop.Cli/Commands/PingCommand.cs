@@ -53,7 +53,10 @@ public static class PingCommand
             await client.ConnectAsync(targetIp, port, cts.Token);
             sw.Stop();
 
-            ConsoleRenderer.Success($"Reply from {targetIp}:{port} · {sw.ElapsedMilliseconds} ms");
+            if (!ConsoleRenderer.JsonMode)
+            {
+                ConsoleRenderer.Success($"Reply from {targetIp}:{port} · {sw.ElapsedMilliseconds} ms");
+            }
             ConsoleRenderer.WriteJson(new
             {
                 target = targetIp,
@@ -65,7 +68,10 @@ public static class PingCommand
         }
         catch (Exception ex)
         {
-            ConsoleRenderer.Error($"Ping failed to {targetIp}:{port} · {ex.Message}");
+            if (!ConsoleRenderer.JsonMode)
+            {
+                ConsoleRenderer.Error($"Ping failed to {targetIp}:{port} · {ex.Message}");
+            }
             ConsoleRenderer.WriteJson(new
             {
                 target = targetIp,
