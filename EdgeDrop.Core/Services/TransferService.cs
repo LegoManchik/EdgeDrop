@@ -6,12 +6,14 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Data;
+using System.Collections;
 
 namespace EdgeDrop;
 
 public class TransferService
 {
+    public static Action<IEnumerable, object>? EnableCollectionSynchronization { get; set; }
+
     private readonly Settings _settings;
     private FileReceiver? _receiver;
     private WebServer? _webServer;
@@ -42,7 +44,7 @@ public class TransferService
     {
         _settings = settings;
 
-        BindingOperations.EnableCollectionSynchronization(_queue, _queueLock);
+        EnableCollectionSynchronization?.Invoke(_queue, _queueLock);
     }
 
     public void AttachWebServer(WebServer? webServer)

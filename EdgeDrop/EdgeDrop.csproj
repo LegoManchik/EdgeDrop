@@ -27,10 +27,6 @@
     <Content Include="icons\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Web\MobileHtml.html" />
-    <Content Include="Web\MobileHtml.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -39,6 +35,10 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EdgeDrop.Core\EdgeDrop.Core.csproj" />
   </ItemGroup>
 
 </Project>

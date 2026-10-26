@@ -3,12 +3,7 @@ using WpfApp = System.Windows.Application;
 
 namespace EdgeDrop;
 
-public enum AppLanguage
-{
-    System,
-    Russian,
-    English
-}
+// AppLanguage is defined in EdgeDrop.Core (Settings.cs)
 
 public static class LocalizationManager
 {

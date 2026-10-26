@@ -1,9 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
-using System.Windows.Media;
-using Color = System.Windows.Media.Color;
-using Brush = System.Windows.Media.Brush;
 
 namespace EdgeDrop;
 
@@ -29,33 +27,7 @@ public class LogEntry
         LogLevel.Success => "OK",
         LogLevel.Warning => "WARN",
         LogLevel.Error => "ERR",
-
         _ => "INFO"
-    };
-
-    private static readonly SolidColorBrush InfoBrush = CreateFrozenBrush(Color.FromRgb(0x00, 0x78, 0xD4));
-    private static readonly SolidColorBrush SuccessBrush = CreateFrozenBrush(Color.FromRgb(0x54, 0xB0, 0x54));
-    private static readonly SolidColorBrush WarningBrush = CreateFrozenBrush(Color.FromRgb(0xFF, 0x8C, 0x00));
-    private static readonly SolidColorBrush ErrorBrush = CreateFrozenBrush(Color.FromRgb(0xFF, 0x52, 0x52));
-    private static readonly SolidColorBrush DefaultBrush = CreateFrozenBrush(Color.FromRgb(0x9E, 0x9E, 0x9E));
-
-    private static SolidColorBrush CreateFrozenBrush(Color color)
-    {
-        var b = new SolidColorBrush(color);
-
-        b.Freeze();
-
-        return b;
-    }
-
-    public System.Windows.Media.Brush LevelBrush => Level switch
-    {
-        LogLevel.Info => InfoBrush,
-        LogLevel.Success => SuccessBrush,
-        LogLevel.Warning => WarningBrush,
-        LogLevel.Error => ErrorBrush,
-
-        _ => DefaultBrush
     };
 
     public string FormattedLine => $"[{TimeFormatted}] [{LevelDisplay}] [{Source}] {Message}";
@@ -65,10 +37,15 @@ public static class AppLogger
 {
     private static readonly ObservableCollection<LogEntry> _entries = new();
     private static readonly object _lock = new();
-    private static readonly string LogDir = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EdgeDrop");
-    private static readonly string LogFilePath = System.IO.Path.Combine(LogDir, "app.log");
+    private static readonly string LogDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EdgeDrop");
+    private static readonly string LogFilePath = Path.Combine(LogDir, "app.log");
     public static ObservableCollection<LogEntry> Entries => _entries;
     public static event Action<LogEntry>? LogAdded;
+
+    /// <summary>
+    /// Optional thread dispatcher callback for UI frameworks (e.g. WPF Dispatcher).
+    /// </summary>
+    public static Action<Action>? DispatcherRunner { get; set; }
 
     public static void Log(string message, LogLevel level = LogLevel.Info, string source = "App")
     {
@@ -77,17 +54,13 @@ public static class AppLogger
             Timestamp = DateTime.Now,
             Level = level,
             Source = source,
-
             Message = message
         };
 
-        if (System.Windows.Application.Current?.Dispatcher != null &&
-
-            !System.Windows.Application.Current.Dispatcher.CheckAccess())
+        if (DispatcherRunner != null)
         {
-            System.Windows.Application.Current.Dispatcher.BeginInvoke(() => AddEntry(entry));
+            DispatcherRunner(() => AddEntry(entry));
         }
-
         else
         {
             AddEntry(entry);
@@ -107,8 +80,8 @@ public static class AppLogger
 
             try
             {
-                if (!System.IO.Directory.Exists(LogDir)) System.IO.Directory.CreateDirectory(LogDir);
-                System.IO.File.AppendAllText(LogFilePath, entry.FormattedLine + Environment.NewLine);
+                if (!Directory.Exists(LogDir)) Directory.CreateDirectory(LogDir);
+                File.AppendAllText(LogFilePath, entry.FormattedLine + Environment.NewLine);
             }
             catch { }
         }

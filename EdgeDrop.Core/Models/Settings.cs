@@ -5,6 +5,13 @@ using System.Text.Json.Serialization;
 
 namespace EdgeDrop;
 
+public enum AppLanguage
+{
+    System,
+    Russian,
+    English
+}
+
 public enum ScreenEdge
 {
     Right,

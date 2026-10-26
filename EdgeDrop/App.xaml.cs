@@ -15,6 +15,16 @@ public partial class App : System.Windows.Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        TransferService.EnableCollectionSynchronization = (col, lockObj) =>
+            System.Windows.Data.BindingOperations.EnableCollectionSynchronization(col, lockObj);
+
+        AppLogger.DispatcherRunner = action =>
+        {
+            if (Current?.Dispatcher != null && !Current.Dispatcher.CheckAccess())
+                Current.Dispatcher.BeginInvoke(action);
+            else
+                action();
+        };
         AppDomain.CurrentDomain.UnhandledException += (s, args) =>
         {
             AppLogger.Error($"Unhandled AppDomain exception: {args.ExceptionObject}", "Crash");
