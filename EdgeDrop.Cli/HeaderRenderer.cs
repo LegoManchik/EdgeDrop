@@ -11,7 +11,24 @@ public static class HeaderRenderer
     private static int _lastHeight = 0;
     private static string? _cachedIp = null;
 
-    public const int HeaderHeight = 5; // Rows 1-4 are header & divider, Row 5 is workspace start
+    private static readonly string[] Logo = new[]
+    {
+        "      =++++++++++++-      ",
+        "  +++++++++++++++++++++-  ",
+        " ++++++++++++++++++++++++ ",
+        "-++++++++++++++++++-+++++ ",
+        "++++++++-..=+++++++..++++ ",
+        "+++++++...+++++++++..++++ ",
+        "+++++............=+..++++ ",
+        "+++++............=+..++++ ",
+        "+++++++...+++++++++..++++ ",
+        "++++++++-..=+++++++..++++ ",
+        "-++++++++++++++++++=+++++ ",
+        " ++++++++++++++++++++++++ ",
+        "  +++++++++++++++++++++-  "
+    };
+
+    public static int HeaderHeight => Logo.Length + 2; // 13 rows of logo + 1 divider + 1 workspace row = line 15
 
     public static void Initialize()
     {
@@ -19,18 +36,17 @@ public static class HeaderRenderer
 
         try
         {
-            int height = Math.Max(12, Console.WindowHeight);
-            int width = Math.Max(40, Console.WindowWidth);
+            int height = Math.Max(HeaderHeight + 5, Console.WindowHeight);
+            int width = Math.Max(50, Console.WindowWidth);
             _lastWidth = width;
             _lastHeight = height;
 
-            // Set scrolling region from line 5 to terminal bottom.
-            // Lines 1-4 are PINNED at the top and will NEVER scroll!
+            // Pin lines 1 to (HeaderHeight - 1). Line HeaderHeight is workspace start.
             Console.Write($"\x1b[{HeaderHeight};{height}r");
 
             Redraw();
 
-            // Place cursor at line 5 (start of scrollable workspace)
+            // Place cursor at workspace start
             Console.Write($"\x1b[{HeaderHeight};1H");
         }
         catch { }
@@ -42,7 +58,6 @@ public static class HeaderRenderer
 
         try
         {
-            // Reset scrolling region to full terminal window
             Console.Write("\x1b[r");
             Console.Write($"\x1b[{Console.WindowHeight};1H");
         }
@@ -73,27 +88,44 @@ public static class HeaderRenderer
 
         try
         {
-            int width = Math.Max(40, Console.WindowWidth);
+            int width = Math.Max(50, Console.WindowWidth);
             var settings = Settings.Load();
             _cachedIp ??= GetPrimaryIp();
 
-            // Save current cursor position
+            // Save cursor position
             Console.Write("\x1b[s");
 
-            // Row 1: Logo line 1 + App Name & Version
-            Console.Write("\x1b[1;1H\x1b[2K");
-            Console.Write($"  {ConsoleRenderer.Brand}{ConsoleRenderer.Bold}█████╗ ██████╗{ConsoleRenderer.Reset}   {ConsoleRenderer.TextLight}{ConsoleRenderer.Bold}EdgeDrop{ConsoleRenderer.Reset} {ConsoleRenderer.MutedColor}v{Program.Version}{ConsoleRenderer.Reset}");
+            string[] infoLines = new string[]
+            {
+                "",
+                "",
+                $"{ConsoleRenderer.TextLight}{ConsoleRenderer.Bold}EdgeDrop{ConsoleRenderer.Reset}  {ConsoleRenderer.BrandLight}v{Program.Version}{ConsoleRenderer.Reset}",
+                $"{ConsoleRenderer.DarkMuted}Local Network Peer-to-Peer Transfer{ConsoleRenderer.Reset}",
+                "",
+                $"{ConsoleRenderer.MutedColor}Port:{ConsoleRenderer.Reset} {ConsoleRenderer.TextLight}{settings.Port}{ConsoleRenderer.Reset}   {ConsoleRenderer.DarkMuted}·{ConsoleRenderer.Reset}   {ConsoleRenderer.MutedColor}IP:{ConsoleRenderer.Reset} {ConsoleRenderer.BrandLight}{_cachedIp}{ConsoleRenderer.Reset}",
+                $"{ConsoleRenderer.MutedColor}Discovery:{ConsoleRenderer.Reset} {ConsoleRenderer.TextLight}{(settings.AutoDiscoveryEnabled ? "Active" : "Off")}{ConsoleRenderer.Reset}   {ConsoleRenderer.DarkMuted}·{ConsoleRenderer.Reset}   {ConsoleRenderer.MutedColor}Safe Mode:{ConsoleRenderer.Reset} {ConsoleRenderer.TextLight}{(settings.SafeModeEnabled ? "On" : "Off")}{ConsoleRenderer.Reset}",
+                $"{ConsoleRenderer.MutedColor}Status:{ConsoleRenderer.Reset} {ConsoleRenderer.SuccessColor}Online ● Ready{ConsoleRenderer.Reset}",
+                "",
+                $"{ConsoleRenderer.DarkMuted}Type 'help' for commands, 'exit' to quit.{ConsoleRenderer.Reset}",
+                "",
+                "",
+                ""
+            };
 
-            // Row 2: Logo line 2 + Port & IP
-            Console.Write("\x1b[2;1H\x1b[2K");
-            Console.Write($"  {ConsoleRenderer.Brand}{ConsoleRenderer.Bold}██╔══╝ ██╔══██╗{ConsoleRenderer.Reset}  {ConsoleRenderer.MutedColor}Port:{ConsoleRenderer.Reset} {ConsoleRenderer.TextLight}{settings.Port}{ConsoleRenderer.Reset} {ConsoleRenderer.DarkMuted}·{ConsoleRenderer.Reset} {ConsoleRenderer.MutedColor}IP:{ConsoleRenderer.Reset} {ConsoleRenderer.BrandLight}{_cachedIp}{ConsoleRenderer.Reset}");
+            for (int i = 0; i < Logo.Length; i++)
+            {
+                int row = i + 1;
+                Console.Write($"\x1b[{row};1H\x1b[2K");
 
-            // Row 3: Logo line 3 + Subtitle & Status dot
-            Console.Write("\x1b[3;1H\x1b[2K");
-            Console.Write($"  {ConsoleRenderer.Brand}{ConsoleRenderer.Bold}█████╗ ██████╔╝{ConsoleRenderer.Reset}  {ConsoleRenderer.MutedColor}LAN File Transfer{ConsoleRenderer.Reset} {ConsoleRenderer.DarkMuted}·{ConsoleRenderer.Reset} {ConsoleRenderer.SuccessColor}Online ●{ConsoleRenderer.Reset}");
+                string logoPart = $"{ConsoleRenderer.Brand}{Logo[i]}{ConsoleRenderer.Reset}";
+                string infoPart = i < infoLines.Length ? infoLines[i] : "";
 
-            // Row 4: Subtle divider line across width
-            Console.Write("\x1b[4;1H\x1b[2K");
+                Console.Write($"  {logoPart}   {infoPart}");
+            }
+
+            // Divider row
+            int dividerRow = Logo.Length + 1;
+            Console.Write($"\x1b[{dividerRow};1H\x1b[2K");
             Console.Write($" {ConsoleRenderer.DarkMuted}{new string('─', Math.Max(10, width - 2))}{ConsoleRenderer.Reset}");
 
             // Restore cursor position
