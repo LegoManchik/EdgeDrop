@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using EdgeDrop.Cli.Commands;
 
@@ -11,13 +13,18 @@ public static class Program
 
     public static async Task<int> Main(string[] args)
     {
+        // When launched with NO arguments (e.g. double-clicked from Explorer or 'edgedrop-cli' in console):
+        // Start interactive shell so the window stays open!
         if (args.Length == 0)
         {
-            PrintHelp();
-            return 0;
+            return await RunInteractiveShellAsync();
         }
 
-        // Global flag extraction
+        return await ExecuteCommandLineAsync(args);
+    }
+
+    public static async Task<int> ExecuteCommandLineAsync(string[] args)
+    {
         var cleanArgs = new List<string>();
         foreach (var arg in args)
         {
@@ -85,10 +92,94 @@ public static class Program
         }
     }
 
+    private static async Task<int> RunInteractiveShellAsync()
+    {
+        Console.Title = $"EdgeDrop CLI v{Version}";
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine($"=================================================");
+        Console.WriteLine($"      EdgeDrop Interactive Shell (v{Version})     ");
+        Console.WriteLine($"=================================================");
+        Console.ResetColor();
+        Console.WriteLine("Type a command or 'help' for options. Type 'exit' to quit.\n");
+
+        while (true)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("edgedrop> ");
+            Console.ResetColor();
+
+            string? line = Console.ReadLine();
+            if (line == null) break; // EOF or Ctrl+Z
+            line = line.Trim().Trim('\uFEFF');
+            if (string.IsNullOrEmpty(line)) continue;
+
+            if (line.Equals("exit", StringComparison.OrdinalIgnoreCase) ||
+                line.Equals("quit", StringComparison.OrdinalIgnoreCase) ||
+                line.Equals("q", StringComparison.OrdinalIgnoreCase))
+            {
+                break;
+            }
+
+            if (line.Equals("clear", StringComparison.OrdinalIgnoreCase) ||
+                line.Equals("cls", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.Clear();
+                continue;
+            }
+
+            string[] parsedArgs = ParseCommandLine(line);
+            if (parsedArgs.Length > 0)
+            {
+                await ExecuteCommandLineAsync(parsedArgs);
+                Console.WriteLine();
+            }
+        }
+
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.WriteLine("Bye!");
+        Console.ResetColor();
+        return 0;
+    }
+
+    private static string[] ParseCommandLine(string cmdLine)
+    {
+        var list = new List<string>();
+        bool inQuotes = false;
+        var current = new StringBuilder();
+
+        for (int i = 0; i < cmdLine.Length; i++)
+        {
+            char c = cmdLine[i];
+            if (c == '"')
+            {
+                inQuotes = !inQuotes;
+            }
+            else if (char.IsWhiteSpace(c) && !inQuotes)
+            {
+                if (current.Length > 0)
+                {
+                    list.Add(current.ToString());
+                    current.Clear();
+                }
+            }
+            else
+            {
+                current.Append(c);
+            }
+        }
+
+        if (current.Length > 0)
+        {
+            list.Add(current.ToString());
+        }
+
+        return list.ToArray();
+    }
+
     private static int HandleUnknownCommand(string command)
     {
         ConsoleRenderer.Error($"Unknown command '{command}'.");
-        ConsoleRenderer.Muted("Run 'edgedrop-cli --help' for a list of available commands.");
+        ConsoleRenderer.Muted("Type 'help' for a list of available commands.");
         return 2;
     }
 
@@ -119,6 +210,8 @@ public static class Program
         Console.WriteLine("  web                             Start browser-based web transfer server with QR");
         Console.WriteLine("  ping <target>                   Test connectivity and latency to a peer");
         Console.WriteLine("  status                          Show current configuration, ports, and local IPs");
+        Console.WriteLine("  help                            Show this help information");
+        Console.WriteLine("  exit, quit                      Exit the interactive shell");
         Console.WriteLine();
         Console.WriteLine("OPTIONS:");
         Console.WriteLine("  --json                          Output machine-readable JSON (ideal for scripts)");
@@ -127,11 +220,11 @@ public static class Program
         Console.WriteLine("  --help, -h                      Show this help information");
         Console.WriteLine();
         Console.WriteLine("EXAMPLES:");
-        Console.WriteLine("  edgedrop-cli send report.pdf --to 192.168.1.15");
-        Console.WriteLine("  edgedrop-cli send photo.png archive.zip --to \"Laptop\"");
-        Console.WriteLine("  edgedrop-cli receive --yes --dir \"C:\\Incoming\"");
-        Console.WriteLine("  edgedrop-cli devices --json");
-        Console.WriteLine("  edgedrop-cli ping 192.168.1.15");
+        Console.WriteLine("  send report.pdf --to 192.168.1.15");
+        Console.WriteLine("  send photo.png archive.zip --to \"Laptop\"");
+        Console.WriteLine("  receive --yes --dir \"C:\\Incoming\"");
+        Console.WriteLine("  devices --json");
+        Console.WriteLine("  ping 192.168.1.15");
         Console.WriteLine();
     }
 }
