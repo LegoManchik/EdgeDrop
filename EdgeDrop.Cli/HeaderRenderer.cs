@@ -1,12 +1,12 @@
 using System;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
+using EdgeDrop.Core.Utils;
 
 namespace EdgeDrop.Cli;
 
 public static class HeaderRenderer
 {
+    public static bool IsPinnedLayoutEnabled { get; private set; } = false;
+
     private static int _lastWidth = 0;
     private static int _lastHeight = 0;
     private static string? _cachedIp = null;
@@ -35,15 +35,20 @@ public static class HeaderRenderer
                 try { Console.WindowWidth = Math.Max(96, Console.WindowWidth); } catch { }
             }
 
-            int height = Math.Max(HeaderHeight + 5, Console.WindowHeight);
+            int height = Math.Max(HeaderHeight + FooterRenderer.FooterHeight + 5, Console.WindowHeight);
             int width = Math.Max(50, Console.WindowWidth);
             _lastWidth = width;
             _lastHeight = height;
 
-            // Pin lines 1 to (HeaderHeight - 1). Line HeaderHeight is workspace start.
-            Console.Write($"\x1b[{HeaderHeight};{height}r");
+            int scrollBottom = height - FooterRenderer.FooterHeight;
+
+            // Pin Header (lines 1..HeaderHeight - 1) and Footer (lines scrollBottom + 1..height).
+            // Scrollable region is HeaderHeight..scrollBottom.
+            Console.Write($"\x1b[{HeaderHeight};{scrollBottom}r");
+            IsPinnedLayoutEnabled = true;
 
             Redraw();
+            FooterRenderer.Redraw();
 
             // Place cursor at workspace start
             Console.Write($"\x1b[{HeaderHeight};1H");
@@ -57,6 +62,7 @@ public static class HeaderRenderer
 
         try
         {
+            IsPinnedLayoutEnabled = false;
             Console.Write("\x1b[r");
             Console.Write($"\x1b[{Console.WindowHeight};1H");
         }
@@ -76,6 +82,7 @@ public static class HeaderRenderer
             else
             {
                 Redraw();
+                FooterRenderer.Redraw();
             }
         }
         catch { }
@@ -89,7 +96,7 @@ public static class HeaderRenderer
         {
             int width = Math.Max(50, Console.WindowWidth);
             var settings = Settings.Load();
-            _cachedIp ??= GetPrimaryIp();
+            _cachedIp ??= NetworkHelper.GetPrimaryLocalIp();
 
             // Save cursor position
             Console.Write("\x1b[s");
@@ -132,24 +139,5 @@ public static class HeaderRenderer
             Console.Write("\x1b[u");
         }
         catch { }
-    }
-
-    private static string GetPrimaryIp()
-    {
-        try
-        {
-            var ip = NetworkInterface.GetAllNetworkInterfaces()
-                .Where(ni => ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                .SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
-                .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork && !ip.Address.ToString().StartsWith("169.254"))
-                .Select(ip => ip.Address.ToString())
-                .FirstOrDefault();
-
-            return ip ?? "127.0.0.1";
-        }
-        catch
-        {
-            return "127.0.0.1";
-        }
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
+using EdgeDrop.Core.Utils;
 
 namespace EdgeDrop.Cli.Commands;
 
@@ -10,19 +9,15 @@ public static class StatusCommand
     public static int Run(string[] args)
     {
         var settings = Settings.Load();
-
-        var localIps = NetworkInterface.GetAllNetworkInterfaces()
-            .Where(ni => ni.OperationalStatus == OperationalStatus.Up && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-            .SelectMany(ni => ni.GetIPProperties().UnicastAddresses)
-            .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork && !ip.Address.ToString().StartsWith("169.254"))
-            .Select(ip => ip.Address.ToString())
-            .ToList();
+        string primaryIp = NetworkHelper.GetPrimaryLocalIp();
+        var localIps = NetworkHelper.GetAllActiveLocalIps();
 
         if (ConsoleRenderer.JsonMode)
         {
             ConsoleRenderer.WriteJson(new
             {
                 port = settings.Port,
+                primary_ip = primaryIp,
                 save_folder = settings.SaveFolder,
                 local_ips = localIps,
                 auto_discovery = settings.AutoDiscoveryEnabled,
@@ -37,9 +32,10 @@ public static class StatusCommand
         }
 
         Console.WriteLine();
+        PrintRow("Primary IP", primaryIp);
         PrintRow("Port", settings.Port.ToString());
         PrintRow("Folder", settings.SaveFolder);
-        PrintRow("IPs", string.Join(", ", localIps));
+        PrintRow("All LAN IPs", string.Join(", ", localIps));
         PrintRow("Discovery", settings.AutoDiscoveryEnabled ? "Active" : "Disabled");
         PrintRow("Safe Mode", settings.SafeModeEnabled ? "Enabled" : "Disabled");
         PrintRow("Accept", settings.RequireAcceptIncoming ? "Manual confirmation" : "Automatic");

@@ -1,9 +1,8 @@
 using System;
 using System.IO;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using EdgeDrop.Core.Utils;
 
 namespace EdgeDrop.Cli.Commands;
 
@@ -33,7 +32,7 @@ public static class WebCommand
             Directory.CreateDirectory(saveDir);
         }
 
-        string localIp = GetLocalIpAddress() ?? "127.0.0.1";
+        string localIp = NetworkHelper.GetPrimaryLocalIp();
         string url = $"http://{localIp}:{port}/";
 
         var web = new WebServer(port, saveDir);
@@ -105,29 +104,5 @@ public static class WebCommand
 
         ConsoleRenderer.Info("Stopped.");
         return 0;
-    }
-
-    private static string? GetLocalIpAddress()
-    {
-        try
-        {
-            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (ni.OperationalStatus != OperationalStatus.Up ||
-                    ni.NetworkInterfaceType == NetworkInterfaceType.Loopback)
-                    continue;
-
-                foreach (var ip in ni.GetIPProperties().UnicastAddresses)
-                {
-                    if (ip.Address.AddressFamily == AddressFamily.InterNetwork &&
-                        !ip.Address.ToString().StartsWith("169.254"))
-                    {
-                        return ip.Address.ToString();
-                    }
-                }
-            }
-        }
-        catch { }
-        return null;
     }
 }

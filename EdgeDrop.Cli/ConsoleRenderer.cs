@@ -245,6 +245,12 @@ public static class ConsoleRenderer
             return;
         }
 
+        if (HeaderRenderer.IsPinnedLayoutEnabled)
+        {
+            FooterRenderer.SetActiveTransfer(fileName, ratio, bytesPerSec, remainingSec, bytesSent, totalBytes);
+            return;
+        }
+
         lock (ConsoleLock)
         {
             int barWidth = 20;
@@ -293,6 +299,13 @@ public static class ConsoleRenderer
     public static void FinishProgress()
     {
         if (JsonMode || Quiet) return;
+
+        if (HeaderRenderer.IsPinnedLayoutEnabled)
+        {
+            FooterRenderer.SetIdle();
+            return;
+        }
+
         lock (ConsoleLock)
         {
             if (_lastProgressLength > 0)

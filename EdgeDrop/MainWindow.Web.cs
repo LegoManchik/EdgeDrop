@@ -37,62 +37,7 @@ public partial class MainWindow : Window
 
     public static string GetLocalIp()
     {
-        try
-        {
-            var interfaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
-
-                .Where(ni => ni.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
-
-                             ni.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
-
-                .ToList();
-
-            var candidateIps = new List<(string ip, int priority)>();
-
-            foreach (var ni in interfaces)
-            {
-                string desc = (ni.Description + " " + ni.Name).ToLowerInvariant();
-
-                bool isVirtual = desc.Contains("radmin") || desc.Contains("vpn") ||
-
-                                 desc.Contains("tap") || desc.Contains("virtual") ||
-
-                                 desc.Contains("hyper-v") || desc.Contains("wsl");
-
-                var ipProps = ni.GetIPProperties();
-
-                foreach (var ua in ipProps.UnicastAddresses)
-                {
-                    if (ua.Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork) continue;
-
-                    if (System.Net.IPAddress.IsLoopback(ua.Address)) continue;
-
-                    string ipStr = ua.Address.ToString();
-
-                    if (ipStr.StartsWith("169.254.") || ipStr.StartsWith("26.")) continue;
-
-                    int priority = 20;
-
-                    if (ipStr.StartsWith("192.168.")) priority = 100;
-
-                    else if (ipStr.StartsWith("10.")) priority = 80;
-
-                    else if (ipStr.StartsWith("172.")) priority = 60;
-
-                    if (isVirtual) priority -= 50;
-
-                    candidateIps.Add((ipStr, priority));
-                }
-            }
-
-            var bestIp = candidateIps.OrderByDescending(x => x.priority).FirstOrDefault();
-
-            if (!string.IsNullOrEmpty(bestIp.ip)) return bestIp.ip;
-        }
-
-        catch { }
-
-        return "?";
+        return EdgeDrop.Core.Utils.NetworkHelper.GetPrimaryLocalIp();
     }
 
     private void OnWebChevronClick(object sender, RoutedEventArgs e)
