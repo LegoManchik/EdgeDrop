@@ -1,5 +1,5 @@
 #define MyAppName "EdgeDrop"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "LegoManchik"
 #define MyAppExeName "EdgeDrop.exe"
 #define SourceDir "publish"
@@ -13,7 +13,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 OutputDir=release
-OutputBaseFilename=EdgeDrop_v1.0.0
+OutputBaseFilename=EdgeDrop_v1.1.0
 SetupIconFile=EdgeDrop\icon.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
@@ -30,9 +30,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "autostart"; Description: "Start EdgeDrop on Windows startup"; GroupDescription: "Startup:"; Flags: unchecked
 Name: "shellcontext"; Description: "Add 'Send with EdgeDrop' to Windows Explorer context menu"; GroupDescription: "File Explorer Integration:"; Flags: unchecked
+Name: "addtopath"; Description: "Add EdgeDrop to system PATH (allows typing 'edgedrop' in terminal)"; GroupDescription: "Command Line / Terminal:"; Flags: checkedonce
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#SourceDir}\edgedrop-cli.exe"; DestDir: "{app}"; DestName: "edgedrop.exe"; Flags: ignoreversion
 Source: "EdgeDrop\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
@@ -61,3 +63,57 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 [UninstallRun]
 Filename: "netsh"; Parameters: "advfirewall firewall delete rule name=""EdgeDrop Port 11000"""; Flags: runhidden
 Filename: "netsh"; Parameters: "advfirewall firewall delete rule name=""EdgeDrop Discovery Port 11001"""; Flags: runhidden
+
+[Code]
+const
+    EnvKey = 'SYSTEM\CurrentControlSet\Control\Session Manager\Environment';
+
+procedure AddToPath(Dir: string);
+var
+    OldPath, NewPath: string;
+begin
+    if not RegQueryStringValue(HKEY_LOCAL_MACHINE, EnvKey, 'Path', OldPath) then
+        OldPath := '';
+
+    if Pos(';' + Uppercase(Dir) + ';', ';' + Uppercase(OldPath) + ';') = 0 then
+    begin
+        if (Length(OldPath) > 0) and (OldPath[Length(OldPath)] <> ';') then
+            OldPath := OldPath + ';';
+        NewPath := OldPath + Dir;
+        RegWriteStringValue(HKEY_LOCAL_MACHINE, EnvKey, 'Path', NewPath);
+    end;
+end;
+
+procedure RemoveFromPath(Dir: string);
+var
+    OldPath: string;
+    P: Integer;
+begin
+    if RegQueryStringValue(HKEY_LOCAL_MACHINE, EnvKey, 'Path', OldPath) then
+    begin
+        P := Pos(';' + Uppercase(Dir) + ';', ';' + Uppercase(OldPath) + ';');
+        if P > 0 then
+        begin
+            Delete(OldPath, P, Length(Dir));
+            if (Length(OldPath) > 0) and (OldPath[1] = ';') then
+                Delete(OldPath, 1, 1);
+            RegWriteStringValue(HKEY_LOCAL_MACHINE, EnvKey, 'Path', OldPath);
+        end;
+    end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+    if (CurStep = ssPostInstall) and WizardIsTaskSelected('addtopath') then
+    begin
+        AddToPath(ExpandConstant('{app}'));
+    end;
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+    if CurUninstallStep = usPostUninstall then
+    begin
+        RemoveFromPath(ExpandConstant('{app}'));
+    end;
+end;

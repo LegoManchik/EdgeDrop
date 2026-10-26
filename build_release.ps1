@@ -14,6 +14,33 @@ dotnet publish EdgeDrop.Cli/EdgeDrop.Cli.csproj -c Release -r win-x64 --self-con
 # Standalone CLI package
 dotnet publish EdgeDrop.Cli/EdgeDrop.Cli.csproj -c Release -r win-x64 --self-contained false -o publish_cli
 
+# Create 'edgedrop.exe' alias copy so users can type either 'edgedrop' or 'edgedrop-cli'
+Copy-Item "publish\edgedrop-cli.exe" -Destination "publish\edgedrop.exe" -Force
+Copy-Item "publish_cli\edgedrop-cli.exe" -Destination "publish_cli\edgedrop.exe" -Force
+
+# Create 1-click 'add_to_path.cmd' for portable zip users
+$addToPathCmd = @"
+@echo off
+setlocal
+echo Adding EdgeDrop to User PATH environment variable...
+set "TARGET_DIR=%~dp0"
+set "TARGET_DIR=%TARGET_DIR:~0,-1%"
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "`$dir = '%TARGET_DIR%';" ^
+  "`$path = [Environment]::GetEnvironmentVariable('Path', 'User');" ^
+  "if (`$path -split ';' -notcontains `$dir) {" ^
+  "    [Environment]::SetEnvironmentVariable('Path', `$path.TrimEnd(';') + ';' + `$dir, 'User');" ^
+  "    Write-Host '[OK] EdgeDrop successfully added to your PATH!' -ForegroundColor Green;" ^
+  "    Write-Host 'You can now open a new PowerShell or Command Prompt and type: edgedrop' -ForegroundColor Cyan;" ^
+  "} else {" ^
+  "    Write-Host '[INFO] EdgeDrop is already in your PATH.' -ForegroundColor Yellow;" ^
+  "}"
+pause
+"@
+Set-Content -Path "publish\add_to_path.cmd" -Value $addToPathCmd -Encoding ASCII
+Set-Content -Path "publish_cli\add_to_path.cmd" -Value $addToPathCmd -Encoding ASCII
+
 # Remove debugging symbols
 Remove-Item -Path "publish\*.pdb" -Force -ErrorAction SilentlyContinue
 Remove-Item -Path "publish_cli\*.pdb" -Force -ErrorAction SilentlyContinue
