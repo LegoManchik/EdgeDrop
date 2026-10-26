@@ -104,12 +104,12 @@ public static class Program
         Console.Title = $"EdgeDrop CLI v{Version}";
         try
         {
-            if (Console.WindowWidth < 105) Console.WindowWidth = 105;
-            if (Console.WindowHeight < 34) Console.WindowHeight = 34;
+            if (Console.WindowWidth < 110) Console.WindowWidth = 110;
+            if (Console.WindowHeight < 42) Console.WindowHeight = 42;
         }
         catch { }
 
-        HeaderRenderer.PrintBanner();
+        HeaderRenderer.Initialize();
 
         var history = new List<string>();
         string prompt = $"  {ConsoleRenderer.MutedColor}edgedrop{ConsoleRenderer.Reset} {ConsoleRenderer.BrandLight}❯{ConsoleRenderer.Reset} ";
@@ -118,6 +118,8 @@ public static class Program
         {
             while (true)
             {
+                HeaderRenderer.CheckResize();
+
                 string? line = ConsoleInput.ReadLine(prompt, history);
                 if (line == null) break;
                 line = line.Trim().Trim('\uFEFF');
@@ -134,7 +136,7 @@ public static class Program
                     line.Equals("cls", StringComparison.OrdinalIgnoreCase))
                 {
                     Console.Clear();
-                    HeaderRenderer.PrintBanner();
+                    HeaderRenderer.Initialize();
                     continue;
                 }
 
@@ -148,7 +150,7 @@ public static class Program
         }
         finally
         {
-            Console.Write("\x1b[r");
+            HeaderRenderer.Reset();
         }
 
         return 0;
