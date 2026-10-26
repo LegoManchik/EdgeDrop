@@ -228,44 +228,12 @@ public static class ConsoleRenderer
 
     public static void RenderProgress(string fileName, double ratio, double bytesPerSec, double remainingSec, long bytesSent, long totalBytes)
     {
-        if (Quiet) return;
-
-        if (JsonMode)
-        {
-            WriteJsonEvent("progress", new
-            {
-                file = fileName,
-                bytes = bytesSent,
-                total = totalBytes,
-                percent = Math.Round(ratio * 100, 1),
-                speed_bps = Math.Round(bytesPerSec, 0),
-                eta_sec = Math.Round(remainingSec, 0)
-            });
-            return;
-        }
-
-        if (HeaderRenderer.IsPinnedLayoutEnabled)
-        {
-            FooterRenderer.SetActiveTransfer(fileName, ratio, bytesPerSec, remainingSec, bytesSent, totalBytes);
-        }
-        else
-        {
-            ProgressRenderer.Render(fileName, ratio, bytesPerSec, remainingSec, bytesSent, totalBytes);
-        }
+        ProgressRenderer.Render(fileName, ratio, bytesPerSec, remainingSec, bytesSent, totalBytes);
     }
 
     public static void FinishProgress()
     {
-        if (JsonMode || Quiet) return;
-
-        if (HeaderRenderer.IsPinnedLayoutEnabled)
-        {
-            FooterRenderer.SetIdle();
-        }
-        else
-        {
-            ProgressRenderer.Finish();
-        }
+        ProgressRenderer.Finish();
     }
 
     public static string FormatBytes(long bytes)
