@@ -27,7 +27,6 @@ public static class ConsoleRenderer
 
     private static bool _ansiEnabled = false;
     private static readonly object ConsoleLock = new();
-    private static int _lastProgressLength = 0;
 
     static ConsoleRenderer()
     {
@@ -229,91 +228,12 @@ public static class ConsoleRenderer
 
     public static void RenderProgress(string fileName, double ratio, double bytesPerSec, double remainingSec, long bytesSent, long totalBytes)
     {
-        if (Quiet) return;
-
-        if (JsonMode)
-        {
-            WriteJsonEvent("progress", new
-            {
-                file = fileName,
-                bytes = bytesSent,
-                total = totalBytes,
-                percent = Math.Round(ratio * 100, 1),
-                speed_bps = Math.Round(bytesPerSec, 0),
-                eta_sec = Math.Round(remainingSec, 0)
-            });
-            return;
-        }
-
-        if (HeaderRenderer.IsPinnedLayoutEnabled)
-        {
-            FooterRenderer.SetActiveTransfer(fileName, ratio, bytesPerSec, remainingSec, bytesSent, totalBytes);
-            return;
-        }
-
-        lock (ConsoleLock)
-        {
-            int barWidth = 20;
-            double clampedRatio = Math.Clamp(ratio, 0.0, 1.0);
-            int filled = (int)(clampedRatio * barWidth);
-            int empty = barWidth - filled;
-
-            string speedText = FormatSpeed(bytesPerSec);
-            string etaText = TimeSpan.FromSeconds(Math.Max(0, remainingSec)).ToString(@"mm\:ss");
-            string percentText = $"{(clampedRatio * 100):F0}%";
-            string name = Truncate(fileName, 18);
-
-            string line;
-            if (_ansiEnabled)
-            {
-                string barFilled = new string('█', filled);
-                string barEmpty = new string('░', empty);
-                line = $"\r  {name,-18} {Brand}{barFilled}{DarkMuted}{barEmpty}{Reset} {TextLight}{percentText,4}{Reset} {MutedColor}· {speedText,9} · {etaText}{Reset}";
-            }
-            else
-            {
-                string bar = new string('=', Math.Max(0, filled > 0 ? filled - 1 : 0))
-                           + (filled > 0 ? ">" : "")
-                           + new string(' ', empty);
-                line = $"\r  {name,-18} [{bar}] {percentText,4} {speedText,9} {etaText}";
-            }
-
-            // Clean previous line overhang
-            int visualLen = 2 + 18 + 1 + 20 + 1 + 4 + 3 + 9 + 3 + 5;
-            if (visualLen < _lastProgressLength)
-            {
-                line += new string(' ', _lastProgressLength - visualLen);
-            }
-            _lastProgressLength = visualLen;
-
-            Console.Write(line);
-
-            if (clampedRatio >= 1.0)
-            {
-                Console.WriteLine();
-                _lastProgressLength = 0;
-            }
-        }
+        ProgressRenderer.Render(fileName, ratio, bytesPerSec, remainingSec, bytesSent, totalBytes);
     }
 
     public static void FinishProgress()
     {
-        if (JsonMode || Quiet) return;
-
-        if (HeaderRenderer.IsPinnedLayoutEnabled)
-        {
-            FooterRenderer.SetIdle();
-            return;
-        }
-
-        lock (ConsoleLock)
-        {
-            if (_lastProgressLength > 0)
-            {
-                Console.WriteLine();
-                _lastProgressLength = 0;
-            }
-        }
+        ProgressRenderer.Finish();
     }
 
     public static string FormatBytes(long bytes)
