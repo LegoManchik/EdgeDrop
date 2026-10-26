@@ -342,6 +342,7 @@ public partial class MainWindow : Window
 
             _isPinRevealed = true;
             UpdateWebPinDisplay();
+            UpdateWebQrCode();
             RefreshDevicesUi();
 
             if (WebRegeneratePinRotate != null)
@@ -447,9 +448,14 @@ public partial class MainWindow : Window
                 port = p;
             }
 
-            string url = $"http://{ip}:{port}";
+            string baseUrl = $"http://{ip}:{port}";
+            string qrUrl = baseUrl;
+            if (_settings.SafeModeEnabled && _web != null && !string.IsNullOrEmpty(_web.Pin))
+            {
+                qrUrl = $"{baseUrl}/?pin={_web.Pin}";
+            }
 
-            var qr = QrCode.EncodeText(url, QrCode.Ecc.MEDIUM);
+            var qr = QrCode.EncodeText(qrUrl, QrCode.Ecc.MEDIUM);
 
             var bmp = qr.ToBitmapSource(scale: 6, border: 4);
 
@@ -457,12 +463,12 @@ public partial class MainWindow : Window
             {
                 WebQrImage.Source = bmp;
 
-                WebQrImage.ToolTip = url;
+                WebQrImage.ToolTip = qrUrl;
             }
 
             if (WebIpAddressText != null)
             {
-                WebIpAddressText.Text = url;
+                WebIpAddressText.Text = baseUrl;
             }
 
             if (WebQrContainer != null)
