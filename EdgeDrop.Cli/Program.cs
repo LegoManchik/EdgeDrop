@@ -101,39 +101,46 @@ public static class Program
     private static async Task<int> RunInteractiveShellAsync()
     {
         Console.Title = $"EdgeDrop CLI v{Version}";
-        Console.WriteLine();
-        Console.WriteLine($"  {ConsoleRenderer.Brand}{ConsoleRenderer.Bold}EdgeDrop CLI{ConsoleRenderer.Reset} {ConsoleRenderer.DarkMuted}v{Version}{ConsoleRenderer.Reset}  {ConsoleRenderer.MutedColor}Type 'help' for commands, 'exit' to quit.{ConsoleRenderer.Reset}");
-        Console.WriteLine();
+        HeaderRenderer.Initialize();
 
-        while (true)
+        try
         {
-            Console.Write($"  {ConsoleRenderer.MutedColor}edgedrop{ConsoleRenderer.Reset} {ConsoleRenderer.BrandLight}❯{ConsoleRenderer.Reset} ");
-
-            string? line = Console.ReadLine();
-            if (line == null) break;
-            line = line.Trim().Trim('\uFEFF');
-            if (string.IsNullOrEmpty(line)) continue;
-
-            if (line.Equals("exit", StringComparison.OrdinalIgnoreCase) ||
-                line.Equals("quit", StringComparison.OrdinalIgnoreCase) ||
-                line.Equals("q", StringComparison.OrdinalIgnoreCase))
+            while (true)
             {
-                break;
-            }
+                HeaderRenderer.CheckResize();
+                Console.Write($"  {ConsoleRenderer.MutedColor}edgedrop{ConsoleRenderer.Reset} {ConsoleRenderer.BrandLight}❯{ConsoleRenderer.Reset} ");
 
-            if (line.Equals("clear", StringComparison.OrdinalIgnoreCase) ||
-                line.Equals("cls", StringComparison.OrdinalIgnoreCase))
-            {
-                Console.Clear();
-                continue;
-            }
+                string? line = Console.ReadLine();
+                if (line == null) break;
+                line = line.Trim().Trim('\uFEFF');
+                if (string.IsNullOrEmpty(line)) continue;
 
-            string[] parsedArgs = ParseCommandLine(line);
-            if (parsedArgs.Length > 0)
-            {
-                await ExecuteCommandLineAsync(parsedArgs);
-                Console.WriteLine();
+                if (line.Equals("exit", StringComparison.OrdinalIgnoreCase) ||
+                    line.Equals("quit", StringComparison.OrdinalIgnoreCase) ||
+                    line.Equals("q", StringComparison.OrdinalIgnoreCase))
+                {
+                    break;
+                }
+
+                if (line.Equals("clear", StringComparison.OrdinalIgnoreCase) ||
+                    line.Equals("cls", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.Clear();
+                    HeaderRenderer.Initialize();
+                    continue;
+                }
+
+                string[] parsedArgs = ParseCommandLine(line);
+                if (parsedArgs.Length > 0)
+                {
+                    await ExecuteCommandLineAsync(parsedArgs);
+                    Console.WriteLine();
+                }
             }
+        }
+        finally
+        {
+            HeaderRenderer.Reset();
         }
 
         return 0;
