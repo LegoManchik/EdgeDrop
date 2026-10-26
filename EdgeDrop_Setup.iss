@@ -34,7 +34,6 @@ Name: "addtopath"; Description: "Add EdgeDrop to system PATH (allows typing 'edg
 
 [Files]
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#SourceDir}\edgedrop-cli.exe"; DestDir: "{app}"; DestName: "edgedrop.exe"; Flags: ignoreversion
 Source: "EdgeDrop\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]

@@ -5,6 +5,10 @@
 
 $ErrorActionPreference = "Stop"
 
+# Clean previous publish artifacts
+Remove-Item -Path "publish" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "publish_cli" -Recurse -Force -ErrorAction SilentlyContinue
+
 Write-Host "==> [1/5] Publishing EdgeDrop GUI (Release win-x64)..." -ForegroundColor Cyan
 dotnet publish EdgeDrop/EdgeDrop.csproj -c Release -r win-x64 --self-contained false -o publish
 
@@ -13,10 +17,6 @@ dotnet publish EdgeDrop.Cli/EdgeDrop.Cli.csproj -c Release -r win-x64 --self-con
 
 # Standalone CLI package
 dotnet publish EdgeDrop.Cli/EdgeDrop.Cli.csproj -c Release -r win-x64 --self-contained false -o publish_cli
-
-# Create 'edgedrop.exe' alias copy so users can type either 'edgedrop' or 'edgedrop-cli'
-Copy-Item "publish\edgedrop-cli.exe" -Destination "publish\edgedrop.exe" -Force
-Copy-Item "publish_cli\edgedrop-cli.exe" -Destination "publish_cli\edgedrop.exe" -Force
 
 # Create 1-click 'add_to_path.cmd' for portable zip users
 $addToPathCmd = @"
@@ -32,7 +32,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "if (`$path -split ';' -notcontains `$dir) {" ^
   "    [Environment]::SetEnvironmentVariable('Path', `$path.TrimEnd(';') + ';' + `$dir, 'User');" ^
   "    Write-Host '[OK] EdgeDrop successfully added to your PATH!' -ForegroundColor Green;" ^
-  "    Write-Host 'You can now open a new PowerShell or Command Prompt and type: edgedrop' -ForegroundColor Cyan;" ^
+  "    Write-Host 'You can now open a new PowerShell or Command Prompt and type: edgedrop-cli' -ForegroundColor Cyan;" ^
   "} else {" ^
   "    Write-Host '[INFO] EdgeDrop is already in your PATH.' -ForegroundColor Yellow;" ^
   "}"
