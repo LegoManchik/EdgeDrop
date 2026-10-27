@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace EdgeDrop.Cli.Commands;
 
@@ -35,9 +36,13 @@ public static class OpenCommand
 
         try
         {
+            string launcher = "explorer.exe";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) launcher = "xdg-open";
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) launcher = "open";
+
             Process.Start(new ProcessStartInfo
             {
-                FileName = "explorer.exe",
+                FileName = launcher,
                 Arguments = $"\"{targetPath}\"",
                 UseShellExecute = true
             });
