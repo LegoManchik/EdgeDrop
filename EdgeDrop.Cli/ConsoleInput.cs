@@ -11,7 +11,7 @@ public static class ConsoleInput
 {
     private static readonly string[] Commands = new[]
     {
-        "send", "receive", "devices", "scan", "web", "ping", "status", "qr", "help", "clear", "exit"
+        "send", "receive", "devices", "scan", "web", "qr", "history", "config", "open", "ping", "status", "help", "clear", "exit"
     };
 
     public static string? ReadLine(string prompt, List<string> history)
@@ -26,7 +26,6 @@ public static class ConsoleInput
         int historyIndex = history.Count;
         string savedDraft = "";
 
-        // Tab completion state
         List<string>? tabMatches = null;
         int tabIndex = -1;
         int tabWordStart = 0;
@@ -40,7 +39,6 @@ public static class ConsoleInput
         {
             var keyInfo = Console.ReadKey(intercept: true);
 
-            // If key is NOT tab, reset tab completion state
             if (keyInfo.Key != ConsoleKey.Tab)
             {
                 tabMatches = null;
@@ -172,7 +170,6 @@ public static class ConsoleInput
                 continue;
             }
 
-            // Regular printable char
             if (!char.IsControl(keyInfo.KeyChar))
             {
                 buffer.Insert(cursorPos, keyInfo.KeyChar);
@@ -194,7 +191,6 @@ public static class ConsoleInput
 
         if (matches == null)
         {
-            // First tab press: determine word at/before cursor
             wordStart = cursorPos;
             while (wordStart > 0 && !char.IsWhiteSpace(fullText[wordStart - 1]))
             {
@@ -204,7 +200,6 @@ public static class ConsoleInput
             wordLength = cursorPos - wordStart;
             string prefix = fullText.Substring(wordStart, wordLength).Trim('"');
 
-            // Are we completing a command (first token) or argument (subsequent tokens)?
             bool isFirstWord = !fullText.Substring(0, wordStart).Any(c => !char.IsWhiteSpace(c));
 
             if (isFirstWord)
@@ -215,7 +210,6 @@ public static class ConsoleInput
             }
             else
             {
-                // Filesystem autocompletion
                 matches = GetFileSystemMatches(prefix);
             }
 
@@ -232,7 +226,6 @@ public static class ConsoleInput
         }
 
         string replacement = matches[tabIndex];
-        // Enclose in quotes if filename has spaces
         if (replacement.Contains(' ') && !replacement.StartsWith("\""))
         {
             replacement = $"\"{replacement}\"";

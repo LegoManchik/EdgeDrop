@@ -11,19 +11,18 @@ public static class ConsoleRenderer
     public static bool JsonMode { get; set; } = false;
     public static bool Quiet { get; set; } = false;
 
-    // ANSI Color Palettes (TrueColor / 24-bit with fallback)
     public const string Reset = "\x1b[0m";
     public const string Bold = "\x1b[1m";
     public const string Dim = "\x1b[2m";
 
-    public const string Brand = "\x1b[38;2;14;165;233m";      // Sky Blue #0EA5E9
-    public const string BrandLight = "\x1b[38;2;56;189;248m"; // Light Sky #38BDF8
-    public const string SuccessColor = "\x1b[38;2;16;185;129m"; // Emerald #10B981
-    public const string WarningColor = "\x1b[38;2;245;158;11m"; // Amber #F59E0B
-    public const string ErrorColor = "\x1b[38;2;244;63;94m";    // Rose Red #F43F5E
-    public const string MutedColor = "\x1b[38;2;148;163;184m";  // Slate #94A3B8
-    public const string DarkMuted = "\x1b[38;2;100;116;139m";   // Dark Slate #64748B
-    public const string TextLight = "\x1b[38;2;241;245;249m";   // Soft White #F1F5F9
+    public const string Brand = "\x1b[38;2;14;165;233m";
+    public const string BrandLight = "\x1b[38;2;56;189;248m";
+    public const string SuccessColor = "\x1b[38;2;16;185;129m";
+    public const string WarningColor = "\x1b[38;2;245;158;11m";
+    public const string ErrorColor = "\x1b[38;2;244;63;94m";
+    public const string MutedColor = "\x1b[38;2;148;163;184m";
+    public const string DarkMuted = "\x1b[38;2;100;116;139m";
+    public const string TextLight = "\x1b[38;2;241;245;249m";
 
     private static bool _ansiEnabled = false;
     private static readonly object ConsoleLock = new();

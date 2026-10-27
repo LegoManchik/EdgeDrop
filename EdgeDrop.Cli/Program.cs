@@ -19,8 +19,6 @@ public static class Program
         }
         catch { }
 
-        // When launched with NO arguments (double-clicked or 'edgedrop-cli' in console):
-        // Start interactive shell
         if (args.Length == 0)
         {
             return await RunInteractiveShellAsync();
@@ -82,9 +80,13 @@ public static class Program
                 "receive" or "listen" => await ReceiveCommand.RunAsync(cmdArgs),
                 "devices" or "scan" => await DevicesCommand.RunAsync(cmdArgs),
                 "web" => await WebCommand.RunAsync(cmdArgs),
+                "qr" => QrCommand.Run(cmdArgs),
+                "config" => ConfigCommand.Run(cmdArgs),
+                "set" or "get" => ConfigCommand.Run(new[] { command }.Concat(cmdArgs).ToArray()),
+                "history" or "hist" or "log" => HistoryCommand.Run(cmdArgs),
+                "open" => OpenCommand.Run(cmdArgs),
                 "ping" => await PingCommand.RunAsync(cmdArgs),
                 "status" => StatusCommand.Run(cmdArgs),
-                "qr" => QrCommand.Run(cmdArgs),
                 _ => HandleUnknownCommand(command)
             };
         }
@@ -203,7 +205,7 @@ public static class Program
             {
                 app = "EdgeDrop CLI",
                 version = Version,
-                commands = new[] { "send", "receive", "devices", "web", "ping", "status" }
+                commands = new[] { "send", "receive", "devices", "web", "qr", "config", "history", "open", "ping", "status" }
             });
             return;
         }
@@ -215,19 +217,22 @@ public static class Program
         Console.WriteLine($"    edgedrop-cli <command> [options]");
         Console.WriteLine();
         Console.WriteLine($"  {ConsoleRenderer.Bold}Commands:{ConsoleRenderer.Reset}");
-        Console.WriteLine($"    {ConsoleRenderer.BrandLight}send{ConsoleRenderer.Reset} <files...> --to <target>   Send file(s) to a peer or IP");
-        Console.WriteLine($"    {ConsoleRenderer.BrandLight}receive{ConsoleRenderer.Reset}                         Start listening for incoming files");
-        Console.WriteLine($"    {ConsoleRenderer.BrandLight}devices{ConsoleRenderer.Reset}                         Scan local network for EdgeDrop peers");
-        Console.WriteLine($"    {ConsoleRenderer.BrandLight}web{ConsoleRenderer.Reset}                             Start web transfer server with QR");
-        Console.WriteLine($"    {ConsoleRenderer.BrandLight}qr{ConsoleRenderer.Reset} [url]                        Show QR code for mobile connection");
-        Console.WriteLine($"    {ConsoleRenderer.BrandLight}ping{ConsoleRenderer.Reset} <target>                   Check latency to a peer");
-        Console.WriteLine($"    {ConsoleRenderer.BrandLight}status{ConsoleRenderer.Reset}                          Show active configuration and local IPs");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}send{ConsoleRenderer.Reset} <files...> [--to <peer>]       Send file(s) or folders to target");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}receive{ConsoleRenderer.Reset}                             Listen for incoming files");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}devices{ConsoleRenderer.Reset} [scan|list|add|rm]          Manage and discover network peers");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}web{ConsoleRenderer.Reset}                                 Start browser server for mobile devices");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}qr{ConsoleRenderer.Reset} [url]                            Generate terminal QR code");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}history{ConsoleRenderer.Reset} [count|clear]               View or clear transfer history");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}config{ConsoleRenderer.Reset} [list|get|set|reset]         View and modify settings");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}open{ConsoleRenderer.Reset} [folder]                       Open downloads folder in Explorer");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}ping{ConsoleRenderer.Reset} <target>                       Check latency to a peer");
+        Console.WriteLine($"    {ConsoleRenderer.BrandLight}status{ConsoleRenderer.Reset}                              Show active config and LAN IPs");
         Console.WriteLine();
         Console.WriteLine($"  {ConsoleRenderer.Bold}Options:{ConsoleRenderer.Reset}");
-        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--json{ConsoleRenderer.Reset}                          Machine-readable JSON output");
-        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--quiet, -q{ConsoleRenderer.Reset}                     Suppress progress and info messages");
-        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--version, -v{ConsoleRenderer.Reset}                   Show version");
-        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--help, -h{ConsoleRenderer.Reset}                      Show this help");
+        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--json{ConsoleRenderer.Reset}                              Machine-readable JSON output");
+        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--quiet, -q{ConsoleRenderer.Reset}                         Suppress progress and info messages");
+        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--version, -v{ConsoleRenderer.Reset}                       Show version");
+        Console.WriteLine($"    {ConsoleRenderer.MutedColor}--help, -h{ConsoleRenderer.Reset}                          Show this help");
         Console.WriteLine();
     }
 }

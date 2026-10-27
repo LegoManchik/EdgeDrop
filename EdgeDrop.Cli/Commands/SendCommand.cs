@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EdgeDrop.Services;
 
 namespace EdgeDrop.Cli.Commands;
 
@@ -127,6 +128,9 @@ public static class SendCommand
 
                 ConsoleRenderer.FinishProgress();
                 ConsoleRenderer.Success($"Sent in {swFile.Elapsed:s\\.f}s");
+
+                HistoryService.Add(fileName, "Отправлено", isIncoming: false, isError: false, filePath: actualPath);
+
                 ConsoleRenderer.WriteJsonEvent("file_complete", new
                 {
                     file = fileName,
@@ -139,6 +143,7 @@ public static class SendCommand
             {
                 ConsoleRenderer.FinishProgress();
                 ConsoleRenderer.Warning($"Cancelled");
+                HistoryService.Add(fileName, "Отменено", isIncoming: false, isError: true, filePath: actualPath);
                 failed++;
                 break;
             }
@@ -146,6 +151,7 @@ public static class SendCommand
             {
                 ConsoleRenderer.FinishProgress();
                 ConsoleRenderer.Error($"{ex.Message}");
+                HistoryService.Add(fileName, $"Ошибка: {ex.Message}", isIncoming: false, isError: true, filePath: actualPath);
                 ConsoleRenderer.WriteJsonEvent("file_error", new { file = fileName, error = ex.Message });
                 failed++;
             }

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using EdgeDrop.Services;
 
 namespace EdgeDrop.Cli.Commands;
 
@@ -102,6 +103,7 @@ public static class ReceiveCommand
         {
             ConsoleRenderer.FinishProgress();
             ConsoleRenderer.Success($"Received '{fileName}'");
+            HistoryService.Add(fileName, "Получено", isIncoming: true, isError: false, filePath: Path.Combine(saveDir, fileName));
             ConsoleRenderer.WriteJsonEvent("receive_complete", new { file = fileName, save_dir = saveDir });
         };
 
@@ -109,6 +111,7 @@ public static class ReceiveCommand
         {
             ConsoleRenderer.FinishProgress();
             ConsoleRenderer.Warning($"Cancelled '{fileName}'");
+            HistoryService.Add(fileName, "Отменено", isIncoming: true, isError: true, filePath: Path.Combine(saveDir, fileName));
             ConsoleRenderer.WriteJsonEvent("receive_cancelled", new { file = fileName });
         };
 
@@ -116,6 +119,7 @@ public static class ReceiveCommand
         {
             ConsoleRenderer.FinishProgress();
             ConsoleRenderer.Error($"{err}");
+            HistoryService.Add("Файл", $"Ошибка: {err}", isIncoming: true, isError: true, filePath: saveDir);
             ConsoleRenderer.WriteJsonEvent("receive_error", new { error = err });
         };
 
@@ -129,9 +133,11 @@ public static class ReceiveCommand
         try
         {
             receiver.Start();
-            ConsoleRenderer.Info($"Listening on port {port} · {saveDir}");
+            ConsoleRenderer.Success($"Listening on port {port}...");
+            ConsoleRenderer.Muted($"Saving files to: {saveDir}");
             ConsoleRenderer.Muted("Press Ctrl+C to stop.");
-            ConsoleRenderer.WriteJsonEvent("listening", new { port, save_folder = saveDir, auto_accept = autoAccept });
+
+            ConsoleRenderer.WriteJsonEvent("receiver_started", new { port, save_folder = saveDir });
 
             while (!cts.Token.IsCancellationRequested)
             {
@@ -143,7 +149,7 @@ public static class ReceiveCommand
         }
         catch (Exception ex)
         {
-            ConsoleRenderer.Error($"{ex.Message}");
+            ConsoleRenderer.Error($"Receiver error: {ex.Message}");
             return 1;
         }
         finally
@@ -151,7 +157,7 @@ public static class ReceiveCommand
             receiver.Stop();
         }
 
-        ConsoleRenderer.Info("Stopped.");
+        ConsoleRenderer.Info("Stopped listening.");
         return 0;
     }
 }

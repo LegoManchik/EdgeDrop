@@ -6,10 +6,6 @@ namespace EdgeDrop.Cli;
 
 public static class QrRenderer
 {
-    /// <summary>
-    /// Renders a sharp, compact QR code using Unicode half-block characters
-    /// (2 vertical modules per terminal character cell).
-    /// </summary>
     public static void Print(string payload, string? caption = null, string? pin = null)
     {
         string qrPayload = payload;
@@ -45,29 +41,19 @@ public static class QrRenderer
             }
             Console.WriteLine();
 
-            // Colors: White background (\x1b[47m), Black foreground (\x1b[30m)
-            // ▀ (\u2580): top half is foreground (black), bottom is background (white)
-            // ▄ (\u2584): top is background (white), bottom is foreground (black)
-            // █ (\u2588): both top and bottom are black
-            // ' ': both top and bottom are white
-
             const string WhiteBgBlackFg = "\x1b[47m\x1b[30m";
             const string Reset = "\x1b[0m";
 
-            int quietBorder = 2; // modules of quiet zone
+            int quietBorder = 2;
             int totalCols = width + (quietBorder * 2);
 
-            // Top quiet border (1 character row = 2 module rows of pure white)
             Console.Write("    " + WhiteBgBlackFg);
             Console.Write(new string(' ', totalCols));
             Console.WriteLine(Reset);
 
-            // Render matrix 2 module rows at a time
             for (int y = 0; y < height; y += 2)
             {
                 Console.Write("    " + WhiteBgBlackFg);
-
-                // Left quiet zone
                 Console.Write(new string(' ', quietBorder));
 
                 for (int x = 0; x < width; x++)
@@ -93,12 +79,10 @@ public static class QrRenderer
                     }
                 }
 
-                // Right quiet zone
                 Console.Write(new string(' ', quietBorder));
                 Console.WriteLine(Reset);
             }
 
-            // Bottom quiet border
             Console.Write("    " + WhiteBgBlackFg);
             Console.Write(new string(' ', totalCols));
             Console.WriteLine(Reset);

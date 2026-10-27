@@ -24,7 +24,6 @@ public static class HeaderRenderer
 
         try
         {
-            // Reset any previous scrolling margins so full scrollback is always enabled
             Console.Write("\x1b[r");
 
             int width = Math.Max(50, Console.WindowWidth);
@@ -58,7 +57,6 @@ public static class HeaderRenderer
                 }
             }
 
-            // Divider row
             Console.WriteLine($" {ConsoleRenderer.DarkMuted}{new string('─', Math.Max(10, width - 2))}{ConsoleRenderer.Reset}");
             Console.WriteLine();
         }

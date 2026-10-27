@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using EdgeDrop.Core.Utils;
+using EdgeDrop.Services;
 
 namespace EdgeDrop.Cli.Commands;
 
@@ -52,6 +53,7 @@ public static class WebCommand
         {
             ConsoleRenderer.FinishProgress();
             ConsoleRenderer.Success($"Uploaded: '{fileName}'");
+            HistoryService.Add(fileName, "Получено (Web)", isIncoming: true, isError: false, filePath: Path.Combine(saveDir, fileName));
             ConsoleRenderer.WriteJsonEvent("web_upload_complete", new { file = fileName });
         };
 
@@ -59,6 +61,7 @@ public static class WebCommand
         {
             ConsoleRenderer.FinishProgress();
             ConsoleRenderer.Error($"{err}");
+            HistoryService.Add("Файл (Web)", $"Ошибка: {err}", isIncoming: true, isError: true, filePath: saveDir);
             ConsoleRenderer.WriteJsonEvent("web_error", new { error = err });
         };
 

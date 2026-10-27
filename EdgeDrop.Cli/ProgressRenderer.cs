@@ -33,8 +33,6 @@ public static class ProgressRenderer
 
         lock (SyncLock)
         {
-            // Throttle to at most 16 FPS (every 60ms) to eliminate flickering and excessive CPU usage,
-            // unless completing (ratio >= 1.0)
             if (_isRendering && ratio < 1.0 && ThrottleTimer.IsRunning && ThrottleTimer.ElapsedMilliseconds < 60)
             {
                 return;
@@ -44,7 +42,6 @@ public static class ProgressRenderer
             int width = Math.Max(60, Console.WindowWidth);
             double clampedRatio = Math.Clamp(ratio, 0.0, 1.0);
 
-            // Line 1: Details
             string speedText = ConsoleRenderer.FormatSpeed(bytesPerSec);
             string etaText = TimeSpan.FromSeconds(Math.Max(0, remainingSec)).ToString(@"mm\:ss");
             string bytesInfo = $"{ConsoleRenderer.FormatBytes(bytesSent)} / {ConsoleRenderer.FormatBytes(totalBytes)}";
@@ -52,7 +49,6 @@ public static class ProgressRenderer
 
             string line1 = $"  {ConsoleRenderer.SuccessColor}●{ConsoleRenderer.Reset} {ConsoleRenderer.Bold}{name}{ConsoleRenderer.Reset}  {ConsoleRenderer.DarkMuted}·{ConsoleRenderer.Reset}  {ConsoleRenderer.TextLight}{bytesInfo}{ConsoleRenderer.Reset}  {ConsoleRenderer.DarkMuted}·{ConsoleRenderer.Reset}  {ConsoleRenderer.BrandLight}{speedText}{ConsoleRenderer.Reset}  {ConsoleRenderer.DarkMuted}·{ConsoleRenderer.Reset}  {ConsoleRenderer.MutedColor}ETA: {etaText}{ConsoleRenderer.Reset}";
 
-            // Line 2: Visual progress bar
             int barWidth = Math.Clamp(width - 24, 15, 45);
             int filled = (int)(clampedRatio * barWidth);
             int empty = barWidth - filled;
@@ -62,7 +58,6 @@ public static class ProgressRenderer
 
             string line2 = $"  {ConsoleRenderer.Brand}{barFilled}{ConsoleRenderer.DarkMuted}{barEmpty}{ConsoleRenderer.Reset} {ConsoleRenderer.Bold}{percentText,4}{ConsoleRenderer.Reset}  {ConsoleRenderer.DarkMuted}Transferring...{ConsoleRenderer.Reset}";
 
-            // Pad lines with spaces to overwrite previous text without clearing (\x1b[2K)
             int vis1 = 2 + 2 + name.Length + 3 + bytesInfo.Length + 3 + speedText.Length + 3 + 5 + etaText.Length;
             int vis2 = 2 + barWidth + 1 + 5 + 2 + 15;
 
@@ -74,15 +69,12 @@ public static class ProgressRenderer
 
             if (!_isRendering)
             {
-                // First render: print 2 lines
                 Console.WriteLine(line1 + pad1);
                 Console.Write(line2 + pad2);
                 _isRendering = true;
             }
             else
             {
-                // In-place update: move up 1 line, rewrite line 1, newline, rewrite line 2
-                // Single atomic write call to completely eliminate flicker!
                 Console.Write($"\x1b[1A\r{line1}{pad1}\n{line2}{pad2}");
             }
 
@@ -101,7 +93,6 @@ public static class ProgressRenderer
         {
             if (_isRendering)
             {
-                // Move cursor to bottom of the 2-line progress widget and add a newline
                 Console.WriteLine();
                 _isRendering = false;
                 _lastLine1Len = 0;

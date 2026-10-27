@@ -29,7 +29,6 @@ public static class DevicePicker
 
         var discovered = new Dictionary<string, DeviceOption>(StringComparer.OrdinalIgnoreCase);
 
-        // Saved devices
         foreach (var dev in settings.Devices)
         {
             if (!string.IsNullOrWhiteSpace(dev.Ip))
@@ -45,7 +44,6 @@ public static class DevicePicker
             }
         }
 
-        // Live scan
         using (var discovery = new DeviceDiscoveryService(settings))
         {
             discovery.NewDeviceDiscovered += dev =>
@@ -88,7 +86,6 @@ public static class DevicePicker
             .ThenBy(d => d.Name)
             .ToList();
 
-        // Always add manual IP entry option
         options.Add(new DeviceOption
         {
             Name = "Enter IP address manually...",
@@ -120,7 +117,6 @@ public static class DevicePicker
             }
             else if (key.Key == ConsoleKey.Enter)
             {
-                // Move cursor to below options
                 Console.SetCursorPosition(0, initialCursorTop + options.Count);
                 Console.WriteLine();
 
@@ -152,7 +148,7 @@ public static class DevicePicker
             for (int i = 0; i < options.Count; i++)
             {
                 Console.SetCursorPosition(0, startTop + i);
-                Console.Write("\x1b[2K"); // Clear entire line
+                Console.Write("\x1b[2K");
 
                 var opt = options[i];
                 bool isSelected = (i == selectedIndex);
