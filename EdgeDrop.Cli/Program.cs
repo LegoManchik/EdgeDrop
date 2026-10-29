@@ -103,11 +103,9 @@ public static class Program
 
     private static async Task<int> RunInteractiveShellAsync()
     {
-        Console.Title = $"EdgeDrop CLI v{Version}";
         try
         {
-            if (Console.WindowWidth < 105) Console.WindowWidth = 105;
-            if (Console.WindowHeight < 34) Console.WindowHeight = 34;
+            Console.Title = $"EdgeDrop CLI v{Version}";
         }
         catch { }
 
@@ -116,41 +114,34 @@ public static class Program
         var history = new List<string>();
         string prompt = $"  {ConsoleRenderer.MutedColor}edgedrop{ConsoleRenderer.Reset} {ConsoleRenderer.BrandLight}❯{ConsoleRenderer.Reset} ";
 
-        try
+        while (true)
         {
-            while (true)
+            string? line = ConsoleInput.ReadLine(prompt, history);
+            if (line == null) break;
+            line = line.Trim().Trim('\uFEFF');
+            if (string.IsNullOrEmpty(line)) continue;
+
+            if (line.Equals("exit", StringComparison.OrdinalIgnoreCase) ||
+                line.Equals("quit", StringComparison.OrdinalIgnoreCase) ||
+                line.Equals("q", StringComparison.OrdinalIgnoreCase))
             {
-                string? line = ConsoleInput.ReadLine(prompt, history);
-                if (line == null) break;
-                line = line.Trim().Trim('\uFEFF');
-                if (string.IsNullOrEmpty(line)) continue;
-
-                if (line.Equals("exit", StringComparison.OrdinalIgnoreCase) ||
-                    line.Equals("quit", StringComparison.OrdinalIgnoreCase) ||
-                    line.Equals("q", StringComparison.OrdinalIgnoreCase))
-                {
-                    break;
-                }
-
-                if (line.Equals("clear", StringComparison.OrdinalIgnoreCase) ||
-                    line.Equals("cls", StringComparison.OrdinalIgnoreCase))
-                {
-                    Console.Clear();
-                    HeaderRenderer.PrintBanner();
-                    continue;
-                }
-
-                string[] parsedArgs = ParseCommandLine(line);
-                if (parsedArgs.Length > 0)
-                {
-                    await ExecuteCommandLineAsync(parsedArgs);
-                    Console.WriteLine();
-                }
+                break;
             }
-        }
-        finally
-        {
-            Console.Write("\x1b[r");
+
+            if (line.Equals("clear", StringComparison.OrdinalIgnoreCase) ||
+                line.Equals("cls", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.Clear();
+                HeaderRenderer.PrintBanner();
+                continue;
+            }
+
+            string[] parsedArgs = ParseCommandLine(line);
+            if (parsedArgs.Length > 0)
+            {
+                await ExecuteCommandLineAsync(parsedArgs);
+                Console.WriteLine();
+            }
         }
 
         return 0;

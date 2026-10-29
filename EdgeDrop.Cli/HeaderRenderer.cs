@@ -24,8 +24,6 @@ public static class HeaderRenderer
 
         try
         {
-            Console.Write("\x1b[r");
-
             int width = Math.Max(50, Console.WindowWidth);
             var settings = Settings.Load();
             _cachedIp ??= NetworkHelper.GetPrimaryLocalIp();
@@ -41,7 +39,7 @@ public static class HeaderRenderer
                 ""
             };
 
-            bool showInfo = width >= 90;
+            bool showInfo = width >= 105;
 
             Console.WriteLine();
             for (int i = 0; i < Logo.Length; i++)
@@ -54,6 +52,18 @@ public static class HeaderRenderer
                 else
                 {
                     Console.WriteLine($"  {logoPart}");
+                }
+            }
+
+            if (!showInfo)
+            {
+                Console.WriteLine();
+                for (int i = 0; i < infoLines.Length; i++)
+                {
+                    if (!string.IsNullOrEmpty(infoLines[i]))
+                    {
+                        Console.WriteLine($"  {infoLines[i]}");
+                    }
                 }
             }
 
